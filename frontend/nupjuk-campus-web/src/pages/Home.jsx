@@ -1,4 +1,7 @@
 import { Home as HomeIcon, BookOpen, Calendar, Users, Bell } from 'lucide-react';
+import CourseCard from '../components/CourseCard';
+import AssignmentCard from '../components/AssignmentCard';
+import { mockCourses, mockAssignments } from '../data/mockData';
 import '../styles/Home.css';
 import '../styles/Navbar.css';
 
@@ -7,16 +10,28 @@ export default function Home() {
     <div className="home-container">
       <header className="home-header">
         <h1>Nupjuk Campus</h1>
-        <p>Last synced: 11:02 PM</p> {/* Reflected in SRS Design [cite: 161] */}
+        <p>Last synced: Just now</p>
       </header>
 
       <main className="dashboard-content">
-        <section className="welcome-widget">
-          <h3>Welcome!</h3>
-          <p>You have 4 courses verified for the 2026 Spring Semester. [cite: 189, 206]</p>
+        <section style={{ marginTop: '2rem' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline' }}>
+            <h2>Upcoming Deadlines</h2>
+            <span style={{ fontSize: '0.9rem', color: 'var(--accent-color)', cursor: 'pointer' }}>View All &gt;</span>
+          </div>
+          {mockAssignments.map((assignment) => (
+            <AssignmentCard key={assignment.id} assignment={assignment} />
+          ))}
         </section>
-        
-        {/* Placeholder for future course cards */}
+        <section style={{ marginTop: '2rem' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline' }}>
+            <h2>My Courses</h2>
+            <span style={{ fontSize: '0.9rem', color: 'var(--text-secondary)' }}>{mockCourses.length} enrolled</span>
+          </div>
+          {mockCourses.map((course) => (
+            <CourseCard key={course.id} course={course} />
+          ))}
+        </section>
       </main>
 
       <nav className="bottom-nav">

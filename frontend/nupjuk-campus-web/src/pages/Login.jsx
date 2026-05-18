@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { GraduationCap, LogIn } from 'lucide-react';
-import '../styles/Login.css'; // Import the CSS file
+import '../styles/Login.css';
 
 export default function Login() {
   const [email, setEmail] = useState('');
@@ -11,14 +11,16 @@ export default function Login() {
 
   const handleLogin = (e) => {
     e.preventDefault();
-    // Validate KAIST email domain
+    
     if (!email.endsWith('@kaist.ac.kr')) {
       setError('Please use a valid @kaist.ac.kr email address.');
       return;
     }
     
+
     // For now, bypass actual auth and go straight to Home
     navigate('/home');
+
   };
 
   return (
