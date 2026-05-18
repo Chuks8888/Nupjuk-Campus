@@ -1,4 +1,6 @@
 .login-container {
+  background-color: var(--bg-color);
+  color: var(--text-primary);
   padding: 2rem;
   font-family: sans-serif;
   max-width: 400px;
@@ -22,6 +24,9 @@
 }
 
 .form-input {
+  background-color: var(--bg-color);
+  color: var(--text-primary);
+  border: 1px solid var(--border-color);
   width: 100%;
   padding: 0.5rem;
   border: 1px solid #ccc;

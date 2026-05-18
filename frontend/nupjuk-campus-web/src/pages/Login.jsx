@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { GraduationCap, LogIn } from 'lucide-react';
 import '../styles/Login.css'; // Import the CSS file
 
 export default function Login() {
@@ -22,9 +23,10 @@ export default function Login() {
 
   return (
     <div className="login-container">
-      <div className="login-header">
-        <h2>Sign in to Nupjuk Campus</h2>
-        <p>Use your KAIST email to access all features</p>
+      <div className="login-header" style={{ textAlign: 'center' }}>
+        <GraduationCap size={48} color="#007AFF" style={{ marginBottom: '1rem' }} />
+        <h2>Nupjuk Campus</h2>
+        <p>Course Community & Schedule Management for KAIST</p>
       </div>
       
       <form className="login-form" onSubmit={handleLogin}>
@@ -52,7 +54,8 @@ export default function Login() {
         
         {error && <p className="error-message">{error}</p>}
         
-        <button type="submit" className="login-button">
+        <button type="submit" className="login-button" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem' }}>
+          <LogIn size={18} />
           LOGIN
         </button>
       </form>
