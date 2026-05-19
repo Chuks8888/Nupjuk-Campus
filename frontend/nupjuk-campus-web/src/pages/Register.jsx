@@ -58,32 +58,36 @@ export default function Register() {
   );
 
   return (
-    <AuthForm 
-      title="Create your student account______________" 
-      onSubmit={handleRegister} 
-      error={error}
-      footer={footer}
-    >
-      <InputField 
-        label="KAIST Email" 
-        type="email" 
-        value={email} 
-        onChange={(e) => setEmail(e.target.value)} 
-        placeholder="student@kaist.ac.kr" 
-      />
-      <InputField 
-        label="Password" 
-        type="password" 
-        value={password} 
-        onChange={(e) => setPassword(e.target.value)} 
-      />
-      <InputField  
-        type="password" 
-        value={confirmPassword} 
-        onChange={(e) => setConfirmPassword(e.target.value)} 
-        placeholder="confirm password"
-      />
-      <SubmitButton text="REGISTER" icon={UserPlus} />
-    </AuthForm>
+    <div className="auth-page">
+      <div className="login-container">
+      <AuthForm 
+        title="Create your student account" 
+        onSubmit={handleRegister} 
+        error={error}
+        footer={footer}
+      >
+        <InputField 
+          label="KAIST Email" 
+          type="email" 
+          value={email} 
+          onChange={(e) => setEmail(e.target.value)} 
+          placeholder="student@kaist.ac.kr" 
+        />
+        <InputField 
+          label="Password" 
+          type="password" 
+          value={password} 
+          onChange={(e) => setPassword(e.target.value)} 
+        />
+        <InputField  
+          type="password" 
+          value={confirmPassword} 
+          onChange={(e) => setConfirmPassword(e.target.value)} 
+          placeholder="confirm password"
+        />
+        <SubmitButton text="REGISTER" icon={UserPlus} />
+      </AuthForm>
+      </div>
+    </div>
   );
 }

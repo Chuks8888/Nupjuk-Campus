@@ -35,26 +35,30 @@ export default function Login() {
   );
 
   return (
-    <AuthForm 
-      title="Course Community & Schedule Management" 
-      onSubmit={handleLogin} 
-      error={error}
-      footer={footer}
-    >
-      <InputField 
-        label="KAIST Email" 
-        type="email" 
-        value={email} 
-        onChange={(e) => setEmail(e.target.value)} 
-        placeholder="student@kaist.ac.kr" 
-      />
-      <InputField 
-        label="Password" 
-        type="password" 
-        value={password} 
-        onChange={(e) => setPassword(e.target.value)} 
-      />
-      <SubmitButton text="LOGIN" icon={LogIn} />
-    </AuthForm>
+    <div className="auth-page">
+      <div className="login-container">
+      <AuthForm 
+        title="Course Community & Schedule Management" 
+        onSubmit={handleLogin} 
+        error={error}
+        footer={footer}
+      >
+        <InputField 
+          label="KAIST Email" 
+          type="email" 
+          value={email} 
+          onChange={(e) => setEmail(e.target.value)} 
+          placeholder="student@kaist.ac.kr" 
+        />
+        <InputField 
+          label="Password" 
+          type="password" 
+          value={password} 
+          onChange={(e) => setPassword(e.target.value)} 
+        />
+        <SubmitButton text="LOGIN" icon={LogIn} />
+      </AuthForm>
+      </div>
+    </div>
   );
 }

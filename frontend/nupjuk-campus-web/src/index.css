@@ -62,9 +62,32 @@
 }
 
 body {
-  background-color: var(--bg-color);
+  margin: 0;
+  min-height: 100vh;
+  position: relative;
+  overflow-x: hidden;
+
+  /* background-color: var(--bg-color); */
   color: var(--text-primary);
   transition: background-color 0.3s, color 0.3s;
+}
+
+/* Background image layer */
+body::before {
+  content: "";
+
+  position: fixed;
+  inset: 0;
+
+  background-image: url('assets/maxresdefault.jpg');
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+
+  filter: blur(10px);
+  transform: scale(1.05); /* prevents blur edge clipping */
+
+  z-index: -1;
 }
 
 #root {
@@ -121,4 +144,14 @@ code {
   line-height: 135%;
   padding: 4px 8px;
   background: var(--code-bg);
+}
+
+.main-content {
+  flex: 1;
+  padding: 2rem 3rem;
+  overflow-y: auto;
+
+  background-image: url('/assets/maxresdefault.jpg');
+  background-size: cover;
+  background-position: center;
 }
