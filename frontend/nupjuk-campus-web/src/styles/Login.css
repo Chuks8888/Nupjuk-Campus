@@ -9,7 +9,9 @@
   padding: 2rem;
   box-sizing: border-box;
 
-  background-color: var(--bg-color);
+  /* background-color: var(--bg-color); */
+  background: linear-gradient(#0171df, #4898e6);
+  min-height: 100vh;
 
   box-shadow:
     0 10px 40px rgba(0,0,0,0.15);
