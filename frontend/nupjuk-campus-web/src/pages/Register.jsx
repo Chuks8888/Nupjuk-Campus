@@ -9,6 +9,7 @@ import '../styles/Login.css';
 export default function Register() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('')
   const [error, setError] = useState('');
   const [isSubmitted, setIsSubmitted] = useState(false);
 
@@ -18,6 +19,11 @@ export default function Register() {
     
     if (!email.endsWith('@kaist.ac.kr')) {
       setError('Registration is restricted to valid @kaist.ac.kr email addresses.');
+      return;
+    }
+
+    if (confirmPassword !== password){
+      setError('The passwords do not match')
       return;
     }
 
@@ -53,7 +59,7 @@ export default function Register() {
 
   return (
     <AuthForm 
-      title="Create your student account" 
+      title="Create your student account______________" 
       onSubmit={handleRegister} 
       error={error}
       footer={footer}
@@ -70,6 +76,12 @@ export default function Register() {
         type="password" 
         value={password} 
         onChange={(e) => setPassword(e.target.value)} 
+      />
+      <InputField  
+        type="password" 
+        value={confirmPassword} 
+        onChange={(e) => setConfirmPassword(e.target.value)} 
+        placeholder="confirm password"
       />
       <SubmitButton text="REGISTER" icon={UserPlus} />
     </AuthForm>
