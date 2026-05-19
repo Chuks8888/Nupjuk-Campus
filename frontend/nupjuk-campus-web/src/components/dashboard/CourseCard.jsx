@@ -5,7 +5,7 @@ export default function CourseCard({ course }) {
   return (
     <div className="card">
       <div className="card-icon">
-        <Book size={24} color="var(--accent-color)" />
+        <Book size={24} color="#007AFF" />
       </div>
       <div className="card-content">
         <h3>{course.course_code}</h3>

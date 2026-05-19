@@ -43,7 +43,7 @@ export const mockAssignments = [{
   id: 'a1',
   course_id: 'c1',                        //
   title: 'Milestone 3: Design Document',  //
-  due_date: '2026-04-10T23:59:59Z',       //
+  due_date: '2026-05-22T23:59:59Z',       //
   description: 'Submit the final SRS.',   //
   source: 'klms_synced',                  //
   klms_submission_status: 'pending',      //

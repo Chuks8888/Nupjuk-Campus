@@ -1,41 +1,67 @@
+import { useState, useEffect } from 'react';
 import CourseCard from '../components/dashboard/CourseCard';
-import AssignmentCard from '../components/dashboard/AssignmentCard';
+import AssignmentWidget from '../components/dashboard/AssignmentWidget';
+
+// Mocks
 import { mockCourses, mockAssignments } from '../data/mockData';
+
 import '../styles/Home.css';
+import '../styles/Cards.css';
 
 export default function Home() {
-  return (
-    <div className="page-container">
-      <header className="page-header" style={{ marginBottom: '2rem' }}>
-        <h1>Dashboard</h1>
-        <p style={{ color: 'var(--text-secondary)' }}>Last synced: Just now</p>
-      </header>
+  const [dashboardData, setDashboardData] = useState({
+    courses: [],
+    assignments: []
+  });
+  const [isLoading, setIsLoading] = useState(true);
 
-      <div className="dashboard-content">
-        <section style={{ marginBottom: '3rem' }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', marginBottom: '1rem' }}>
-            <h2>Upcoming Deadlines</h2>
-            <span style={{ fontSize: '0.9rem', color: '#007AFF', cursor: 'pointer' }}>View All &gt;</span>
-          </div>
-          <div className="cards-container">
-            {mockAssignments.map((assignment) => (
-              <AssignmentCard key={assignment.id} assignment={assignment} />
-            ))}
-          </div>
-        </section>
+  useEffect(() => {
+    const fetchDashboardData = async () => {
+      setIsLoading(true);
+      try {
+        // Simulate network request
+        await new Promise(resolve => setTimeout(resolve, 800));
         
-        <section>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', marginBottom: '1rem' }}>
-            <h2>My Courses</h2>
-            <span style={{ fontSize: '0.9rem', color: 'var(--text-secondary)' }}>{mockCourses.length} enrolled</span>
-          </div>
-          <div className="cards-container">
-            {mockCourses.map((course) => (
-              <CourseCard key={course.id} course={course} />
-            ))}
-          </div>
-        </section>
+        setDashboardData({
+          courses: mockCourses,
+          assignments: mockAssignments 
+        });
+      } catch (error) {
+        console.error("Failed to load dashboard data", error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchDashboardData();
+  }, []);
+
+  if (isLoading) {
+    return (
+      <div className="page-container" style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100%' }}>
+        <p style={{ color: 'var(--text-secondary)', fontSize: '1.2rem' }}>Syncing...</p>
       </div>
+    );
+  }
+
+  return (
+    <div className="page-container" style={{ maxWidth: '800px', margin: '0 auto' }}>
+      
+      <AssignmentWidget assignments={dashboardData.assignments} />
+
+      <section className="dashboard-section">
+        <div className="section-header">
+          <h2>My Courses</h2>
+          <span className="meta-text">{dashboardData.courses.length} enrolled</span>
+        </div>
+        
+        <div className="cards-container">
+          {dashboardData.courses.map((course) => (
+            <CourseCard key={course.id} course={course} />
+          ))}
+        </div>
+      </section>
+
     </div>
   );
 }
