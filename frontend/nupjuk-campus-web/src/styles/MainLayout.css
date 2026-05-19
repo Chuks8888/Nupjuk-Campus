@@ -1,0 +1,69 @@
+/* The main wrapper filling the whole screen */
+.app-layout {
+  display: flex;
+  min-height: 100vh;
+  background-color: #f5f5f7; /* Light gray background for the app */
+}
+
+/* Sidebar styling */
+.sidebar {
+  width: 250px;
+  background-color: white;
+  border-right: 1px solid #e5e5ea;
+  display: flex;
+  flex-direction: column;
+  padding: 1.5rem 1rem;
+  position: sticky; /* Keeps sidebar visible when scrolling main content */
+  top: 0;
+  height: 100vh;
+}
+
+.sidebar-brand {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin-bottom: 3rem;
+  padding-left: 0.5rem;
+}
+
+.sidebar-brand h2 {
+  margin: 0;
+  font-size: 1.5rem;
+  color: #1c1c1e;
+}
+
+.sidebar-nav {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.nav-item {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 0.75rem 1rem;
+  border-radius: 8px;
+  color: #8e8e93;
+  text-decoration: none;
+  font-weight: 500;
+  transition: all 0.2s ease;
+}
+
+.nav-item:hover {
+  background-color: #f2f2f7;
+  color: #1c1c1e;
+}
+
+/* React Router automatically applies this class to the matched NavLink */
+.nav-item.active {
+  background-color: #e5f1ff;
+  color: #007AFF;
+}
+
+/* Main Content Area */
+.main-content {
+  flex: 1; /* Takes up the remaining space */
+  padding: 2rem 3rem;
+  overflow-y: auto; /* Allows scrolling on the content side */
+}
