@@ -1,5 +1,5 @@
 import { Clock } from 'lucide-react';
-import '../styles/Cards.css';
+import '../../styles/Cards.css';
 
 export default function AssignmentCard({ assignment }) {
   // Format the ISO date string into a readable format

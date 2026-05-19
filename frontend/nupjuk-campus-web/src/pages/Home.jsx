@@ -1,6 +1,6 @@
 import { Home as HomeIcon, BookOpen, Calendar, Users, Bell } from 'lucide-react';
-import CourseCard from '../components/CourseCard';
-import AssignmentCard from '../components/AssignmentCard';
+import CourseCard from '../components/dashboard/CourseCard';
+import AssignmentCard from '../components/dashboard/AssignmentCard';
 import { mockCourses, mockAssignments } from '../data/mockData';
 import '../styles/Home.css';
 import '../styles/Navbar.css';

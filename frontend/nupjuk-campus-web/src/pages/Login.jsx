@@ -1,6 +1,9 @@
 import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { GraduationCap, LogIn } from 'lucide-react';
+import { useNavigate, Link } from 'react-router-dom';
+import { LogIn } from 'lucide-react';
+import AuthForm from '../components/auth/AuthForm';
+import InputField from '../components/auth/InputField';
+import SubmitButton from '../components/auth/SubmitButton';
 import '../styles/Login.css';
 
 export default function Login() {
@@ -11,56 +14,47 @@ export default function Login() {
 
   const handleLogin = (e) => {
     e.preventDefault();
+    setError('');
     
     if (!email.endsWith('@kaist.ac.kr')) {
       setError('Please use a valid @kaist.ac.kr email address.');
       return;
     }
-    
 
-    // For now, bypass actual auth and go straight to Home
+    // MOCK REST API CALL:
+    // In the future, you will await fetch('/api/login', {...}) here.
+    // For now, we simulate receiving a token and saving it.
+    localStorage.setItem('authToken', 'mock_jwt_token_12345');
     navigate('/home');
-
   };
 
+  const footer = (
+    <p style={{ fontSize: '0.9rem' }}>
+      New to Nupjuk Campus? <Link to="/register" style={{ color: '#007AFF', textDecoration: 'none' }}>Register here</Link>
+    </p>
+  );
+
   return (
-    <div className="login-container">
-      <div className="login-header" style={{ textAlign: 'center' }}>
-        <GraduationCap size={48} color="#007AFF" style={{ marginBottom: '1rem' }} />
-        <h2>Nupjuk Campus</h2>
-        <p>Course Community & Schedule Management for KAIST</p>
-      </div>
-      
-      <form className="login-form" onSubmit={handleLogin}>
-        <div className="form-group">
-          <label>KAIST Email</label>
-          <input 
-            type="email" 
-            className="form-input"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            placeholder="student@kaist.ac.kr"
-            required
-          />
-        </div>
-        <div className="form-group">
-          <label>Password</label>
-          <input 
-            type="password" 
-            className="form-input"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            required
-          />
-        </div>
-        
-        {error && <p className="error-message">{error}</p>}
-        
-        <button type="submit" className="login-button" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem' }}>
-          <LogIn size={18} />
-          LOGIN
-        </button>
-      </form>
-    </div>
+    <AuthForm 
+      title="Course Community & Schedule Management" 
+      onSubmit={handleLogin} 
+      error={error}
+      footer={footer}
+    >
+      <InputField 
+        label="KAIST Email" 
+        type="email" 
+        value={email} 
+        onChange={(e) => setEmail(e.target.value)} 
+        placeholder="student@kaist.ac.kr" 
+      />
+      <InputField 
+        label="Password" 
+        type="password" 
+        value={password} 
+        onChange={(e) => setPassword(e.target.value)} 
+      />
+      <SubmitButton text="LOGIN" icon={LogIn} />
+    </AuthForm>
   );
 }

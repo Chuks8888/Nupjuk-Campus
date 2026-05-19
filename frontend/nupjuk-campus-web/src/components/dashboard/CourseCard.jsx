@@ -1,5 +1,5 @@
 import { Book } from 'lucide-react';
-import '../styles/Cards.css';
+import '../../styles/Cards.css';
 
 export default function CourseCard({ course }) {
   return (
