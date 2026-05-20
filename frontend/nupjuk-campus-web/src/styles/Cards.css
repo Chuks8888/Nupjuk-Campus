@@ -11,7 +11,7 @@
 
 .section-header h2 {
   font-size: 1.5rem;
-  color: #1c1c1e;
+  color: var(--text-primary, #1c1c1e);
   margin: 0;
 }
 
@@ -24,14 +24,13 @@
 
 .section-header .meta-text {
   font-size: 0.95rem;
-  color: #8e8e93;
+  color: var(--text-secondary, #8e8e93);
 }
 
 .card {
   background-color: var(--bg-color);
   border: 1px solid var(--border-color);
   border-radius: 12px;
-  padding: 1rem;
   margin-bottom: 1rem;
   display: flex;
   align-items: center;
@@ -39,13 +38,18 @@
   gap: 1rem;
   padding: 1rem;
   box-shadow: 0 2px 4px rgba(0,0,0,0.02);
-  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  transition: transform 0.2s ease, box-shadow 0.2s ease, opacity 0.2s ease;
   cursor: pointer;
 }
 
 .card:hover {
   transform: translateY(-2px);
   box-shadow: 0 4px 8px rgba(0,0,0,0.05);
+}
+
+/* Modifier for completed assignments */
+.card.completed {
+  opacity: 0.7;
 }
 
 .card-icon {
@@ -59,18 +63,15 @@
   flex-shrink: 0;
 }
 
-.card-content h3, .card-content h4 {
-
-  font-size: 1.1rem;
-  font-weight: 600;
-  margin: 0 0 0.25rem 0;
-  color: var(--text-primary);
+/* Modifiers for specific icons */
+.course-icon {
+  color: white;
+  font-weight: bold;
+  font-size: 1.2rem;
 }
 
-.card-content p {
-  margin: 0;
-  font-size: 0.95rem;
-  color: var(--text-secondary);
+.card.completed .assignment-icon {
+  background-color: #e5f8eb;
 }
 
 .card-content {
@@ -81,3 +82,25 @@
   gap: 0.25rem;
 }
 
+.card-content h3, .card-content h4 {
+  font-size: 1.1rem;
+  font-weight: 600;
+  margin: 0;
+  color: var(--text-primary, #1c1c1e);
+}
+
+/* Strikethrough for completed assignments */
+.card.completed .card-content h4 {
+  text-decoration: line-through;
+  color: var(--text-secondary, #8e8e93);
+}
+
+.card-content p {
+  margin: 0;
+  font-size: 0.95rem;
+  color: var(--text-secondary, #8e8e93);
+}
+
+.status-text {
+  text-transform: capitalize;
+}

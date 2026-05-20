@@ -1,4 +1,4 @@
-import AssignmentCard from './AssignmentCard';
+import AssignmentCard from '../common/AssignmentCard';
 
 export default function AssignmentWidget({ assignments }) {
   const now = new Date();
