@@ -1,0 +1,104 @@
+/* src/styles/CourseDetail.css */
+.course-detail-container {
+  padding: 1.5rem;
+  max-width: 800px;
+  margin: 0 auto;
+  font-family: sans-serif;
+  min-height: 90vh;
+}
+
+/* Header Styling */
+.course-detail-header {
+  display: flex;
+  align-items: flex-start;
+  gap: 1rem;
+  margin-bottom: 2rem;
+}
+
+.back-button {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0.5rem 0;
+  color: var(--text-primary, #1c1c1e);
+  display: flex;
+  align-items: center;
+}
+
+.course-header-icon {
+  background-color: #34C759; /* Default green, can be overridden inline if dynamic */
+  color: white;
+  width: 48px;
+  height: 48px;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: bold;
+  font-size: 1.2rem;
+  flex-shrink: 0;
+}
+
+.course-header-info h1 {
+  margin: 0 0 0.25rem 0;
+  font-size: 1.25rem;
+  color: var(--text-primary, #1c1c1e);
+}
+
+.course-header-info .course-name {
+  margin: 0 0 0.5rem 0;
+  color: var(--text-secondary, #8e8e93);
+  font-size: 0.95rem;
+}
+
+.course-meta {
+  display: flex;
+  gap: 1rem;
+  color: var(--text-secondary, #8e8e93);
+  font-size: 0.85rem;
+}
+
+.meta-item {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+/* Tabs Styling */
+.course-tabs-container {
+  display: flex;
+  border-bottom: 1px solid var(--border-color, #e5e5ea);
+  margin-bottom: 1.5rem;
+}
+
+.course-tab-button {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 0.75rem;
+  background: none;
+  border: none;
+  border-bottom: 2px solid transparent;
+  color: var(--text-secondary, #8e8e93);
+  font-weight: 400;
+  cursor: pointer;
+  font-size: 0.95rem;
+  transition: all 0.2s ease;
+}
+
+.course-tab-button:hover {
+  color: var(--text-primary, #1c1c1e);
+}
+
+.course-tab-button.active {
+  border-bottom: 2px solid #007AFF;
+  color: #007AFF;
+  font-weight: 600;
+}
+
+/* Tab Content Area */
+.tab-content {
+  padding-top: 0.5rem;
+}
