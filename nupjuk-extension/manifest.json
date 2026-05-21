@@ -1,0 +1,20 @@
+{
+  "manifest_version": 3,
+  "name": "Nupjuk Campus Sync",
+  "version": "0.1.0",
+  "description": "Parse KLMS page data for Nupjuk Campus.",
+  "permissions": [],
+  "host_permissions": [
+    "https://klms.kaist.ac.kr/*"
+  ],
+  "content_scripts": [
+    {
+      "matches": [
+        "https://klms.kaist.ac.kr/*"
+      ],
+      "js": [
+        "content.js"
+      ]
+    }
+  ]
+}
