@@ -30,7 +30,7 @@ export default function Courses() {
         </div>
       </header>
 
-      <div className="course-list">
+      <div className="cards-container">
         {filteredCourses.map(course => (
           <CourseCard key={course.id} course={course} />
         ))}

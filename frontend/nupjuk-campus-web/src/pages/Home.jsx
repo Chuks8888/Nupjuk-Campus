@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import CourseCard from '../components/dashboard/CourseCard';
+import CourseCard from '../components/common/CourseCard';
 import AssignmentWidget from '../components/dashboard/AssignmentWidget';
 
 // Mocks
@@ -20,7 +20,7 @@ export default function Home() {
       setIsLoading(true);
       try {
         // Simulate network request
-        await new Promise(resolve => setTimeout(resolve, 800));
+        await new Promise(resolve => setTimeout(resolve, 400));
         
         setDashboardData({
           courses: mockCourses,
