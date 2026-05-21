@@ -79,7 +79,7 @@ body::before {
   position: fixed;
   inset: 0;
 
-  background-image: url('assets/maxresdefault.jpg');
+  background-image: url('./assets/maxresdefault.jpg');
   background-size: cover;
   background-position: center;
   background-repeat: no-repeat;
@@ -151,7 +151,7 @@ code {
   padding: 2rem 3rem;
   overflow-y: auto;
 
-  background-image: url('/assets/maxresdefault.jpg');
+  background-image: url('./assets/maxresdefault.jpg');
   background-size: cover;
   background-position: center;
 }

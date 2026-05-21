@@ -1,0 +1,54 @@
+name: nupjuk-campus
+
+services:
+  db:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_DB: nupjuk
+      POSTGRES_USER: nupjuk
+      POSTGRES_PASSWORD: nupjuk_password
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U nupjuk -d nupjuk"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      DATABASE_URL: postgresql://nupjuk:nupjuk_password@db:5432/nupjuk?schema=public
+      JWT_SECRET: ${JWT_SECRET:-change-me-for-staging}
+      EMAIL_USER: ${EMAIL_USER:-}
+      EMAIL_PASS: ${EMAIL_PASS:-}
+      PORT: 3000
+      RUN_MIGRATIONS: "true"
+    ports:
+      - "3000:3000"
+    volumes:
+      - uploads_data:/app/uploads
+    restart: unless-stopped
+
+  web:
+    build:
+      context: ./frontend/nupjuk-campus-web
+      dockerfile: Dockerfile
+      args:
+        VITE_API_BASE_URL: ${VITE_API_BASE_URL:-http://localhost:3000}
+    depends_on:
+      - api
+    ports:
+      - "5173:80"
+    restart: unless-stopped
+
+volumes:
+  postgres_data:
+  uploads_data:
