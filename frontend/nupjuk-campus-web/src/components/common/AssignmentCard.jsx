@@ -10,7 +10,7 @@ export default function AssignmentCard({ assignment }) {
   });
 
   const statusText = assignment.user_completion_status.replace('_', ' ');
-  const isCompleted = assignment.user_completion_status === 'completed';
+  const isCompleted = ['completed', 'done'].includes(assignment.user_completion_status);
 
   return (
     <div className={`card ${isCompleted ? 'completed' : ''}`}>

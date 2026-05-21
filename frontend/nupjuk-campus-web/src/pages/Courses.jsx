@@ -1,13 +1,32 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Search } from 'lucide-react';
 import CourseCard from '../components/common/CourseCard';
-import { mockCourses } from '../data/mockData';
+import { getCourses } from '../api/courses';
 import '../styles/Courses.css';
 
 export default function Courses() {
   const [searchTerm, setSearchTerm] = useState('');
+  const [courses, setCourses] = useState([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState('');
 
-  const filteredCourses = mockCourses.filter(course => 
+  useEffect(() => {
+    const loadCourses = async () => {
+      try {
+        setIsLoading(true);
+        setError('');
+        setCourses(await getCourses());
+      } catch (err) {
+        setError(err.message || 'Failed to load courses.');
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    loadCourses();
+  }, []);
+
+  const filteredCourses = courses.filter(course => 
     course.course_code.toLowerCase().includes(searchTerm.toLowerCase()) ||
     course.course_name.toLowerCase().includes(searchTerm.toLowerCase())
   );
@@ -31,10 +50,12 @@ export default function Courses() {
       </header>
 
       <div className="cards-container">
-        {filteredCourses.map(course => (
+        {isLoading && <p className="empty-state">Loading courses...</p>}
+        {error && <p className="empty-state">{error}</p>}
+        {!isLoading && !error && filteredCourses.map(course => (
           <CourseCard key={course.id} course={course} />
         ))}
-        {filteredCourses.length === 0 && (
+        {!isLoading && !error && filteredCourses.length === 0 && (
           <p className="empty-state">No courses found.</p>
         )}
       </div>

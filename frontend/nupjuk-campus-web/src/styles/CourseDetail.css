@@ -102,3 +102,54 @@
 .tab-content {
   padding-top: 0.5rem;
 }
+
+.course-board-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.875rem;
+}
+
+.board-post-card {
+  padding: 1rem;
+  border: 1px solid var(--border-color, #e5e5ea);
+  border-radius: 8px;
+  background: var(--bg-color);
+  text-align: left;
+}
+
+.board-post-header,
+.board-post-meta {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  color: var(--text-secondary, #8e8e93);
+  font-size: 0.85rem;
+}
+
+.board-post-category {
+  color: #007AFF;
+  font-weight: 600;
+}
+
+.board-post-card h3 {
+  margin: 0.5rem 0;
+  color: var(--text-primary, #1c1c1e);
+  font-size: 1.05rem;
+}
+
+.board-post-card p {
+  margin: 0 0 0.75rem;
+  color: var(--text-secondary, #8e8e93);
+  line-height: 1.45;
+}
+
+.board-post-meta {
+  justify-content: flex-start;
+}
+
+.board-post-meta span {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+}

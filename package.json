@@ -9,6 +9,7 @@
     "start": "node dist/index.js",
     "db:migrate": "prisma migrate deploy",
     "db:generate": "prisma generate",
+    "db:seed": "node prisma/seed.js",
     "test": "..."
   },
   "keywords": [],

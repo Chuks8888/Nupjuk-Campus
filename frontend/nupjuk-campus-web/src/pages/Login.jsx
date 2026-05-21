@@ -4,15 +4,17 @@ import { LogIn } from 'lucide-react';
 import AuthForm from '../components/auth/AuthForm';
 import InputField from '../components/auth/InputField';
 import SubmitButton from '../components/auth/SubmitButton';
+import { login, storeSession } from '../api/auth';
 import '../styles/Login.css';
 
 export default function Login() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const navigate = useNavigate();
 
-  const handleLogin = (e) => {
+  const handleLogin = async (e) => {
     e.preventDefault();
     setError('');
     
@@ -21,11 +23,16 @@ export default function Login() {
       return;
     }
 
-    // MOCK REST API CALL:
-    // In the future, you will await fetch('/api/login', {...}) here.
-    // For now, we simulate receiving a token and saving it.
-    localStorage.setItem('authToken', 'mock_jwt_token_12345');
-    navigate('/home');
+    try {
+      setIsSubmitting(true);
+      const session = await login({ email, password });
+      storeSession(session);
+      navigate('/home');
+    } catch (err) {
+      setError(err.message || 'Login failed.');
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   const footer = (
@@ -56,7 +63,7 @@ export default function Login() {
           value={password} 
           onChange={(e) => setPassword(e.target.value)} 
         />
-        <SubmitButton text="LOGIN" icon={LogIn} />
+        <SubmitButton text={isSubmitting ? 'LOGGING IN...' : 'LOGIN'} icon={LogIn} disabled={isSubmitting} />
       </AuthForm>
       </div>
     </div>

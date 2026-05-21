@@ -1,9 +1,7 @@
 import { useState, useEffect } from 'react';
 import CourseCard from '../components/common/CourseCard';
 import AssignmentWidget from '../components/dashboard/AssignmentWidget';
-
-// Mocks
-import { mockCourses, mockAssignments } from '../data/mockData';
+import { getCourseAssignments, getCourses } from '../api/courses';
 
 import '../styles/Home.css';
 import '../styles/Cards.css';
@@ -14,20 +12,25 @@ export default function Home() {
     assignments: []
   });
   const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState('');
 
   useEffect(() => {
     const fetchDashboardData = async () => {
       setIsLoading(true);
+      setError('');
       try {
-        // Simulate network request
-        await new Promise(resolve => setTimeout(resolve, 400));
+        const courses = await getCourses();
+        const assignmentGroups = await Promise.all(
+          courses.map((course) => getCourseAssignments(course.raw_id))
+        );
         
         setDashboardData({
-          courses: mockCourses,
-          assignments: mockAssignments 
+          courses,
+          assignments: assignmentGroups.flat()
         });
       } catch (error) {
         console.error("Failed to load dashboard data", error);
+        setError(error.message || 'Failed to load dashboard data.');
       } finally {
         setIsLoading(false);
       }
@@ -46,6 +49,7 @@ export default function Home() {
 
   return (
     <div className="page-container" style={{ maxWidth: '800px', margin: '0 auto' }}>
+      {error && <p className="empty-state">{error}</p>}
       
       <AssignmentWidget assignments={dashboardData.assignments} />
 

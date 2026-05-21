@@ -12,3 +12,8 @@ docker compose up --build
 - Postgres: localhost:5432
 
 Set `JWT_SECRET`, `EMAIL_USER`, and `EMAIL_PASS` in `.env` for staging.
+
+Seed data is enabled by default in Docker (`RUN_SEED=true`). Demo login:
+
+- Email: `student@kaist.ac.kr`
+- Password: `password123`

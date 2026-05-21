@@ -4,18 +4,24 @@ import { UserPlus, MailCheck } from 'lucide-react';
 import AuthForm from '../components/auth/AuthForm';
 import InputField from '../components/auth/InputField';
 import SubmitButton from '../components/auth/SubmitButton';
+import { sendVerificationCode, signup } from '../api/auth';
 import '../styles/Login.css';
 
 export default function Register() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('')
+  const [code, setCode] = useState('');
   const [error, setError] = useState('');
+  const [statusMessage, setStatusMessage] = useState('');
+  const [isCodeSent, setIsCodeSent] = useState(false);
   const [isSubmitted, setIsSubmitted] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const handleRegister = (e) => {
+  const handleRegister = async (e) => {
     e.preventDefault();
     setError('');
+    setStatusMessage('');
     
     if (!email.endsWith('@kaist.ac.kr')) {
       setError('Registration is restricted to valid @kaist.ac.kr email addresses.');
@@ -27,11 +33,28 @@ export default function Register() {
       return;
     }
 
-    // MOCK REST API CALL:
-    // Await fetch('/api/register', {...})
-    
-    // On success, flip the view to the verification message
-    setIsSubmitted(true);
+    try {
+      setIsSubmitting(true);
+
+      if (!isCodeSent) {
+        await sendVerificationCode(email);
+        setIsCodeSent(true);
+        setStatusMessage(`Verification code sent to ${email}.`);
+        return;
+      }
+
+      if (!code.trim()) {
+        setError('Please enter the verification code.');
+        return;
+      }
+
+      await signup({ email, password, code: code.trim() });
+      setIsSubmitted(true);
+    } catch (err) {
+      setError(err.message || 'Registration failed.');
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   // If registration is successful, render the success UI
@@ -41,8 +64,7 @@ export default function Register() {
         <MailCheck size={64} color="#34C759" style={{ marginBottom: '1rem' }} />
         <h2>Check Your Inbox</h2>
         <p style={{ margin: '1rem 0', lineHeight: '1.5' }}>
-          We've sent a verification link to <strong>{email}</strong>. 
-          Please click the link in the email to activate your account.
+          Your account for <strong>{email}</strong> has been created.
         </p>
         <Link to="/login" style={{ color: '#007AFF', textDecoration: 'none', fontWeight: 'bold' }}>
           Return to Login
@@ -66,6 +88,9 @@ export default function Register() {
         error={error}
         footer={footer}
       >
+        {statusMessage && (
+          <p style={{ color: '#34C759', fontSize: '0.875rem', margin: 0 }}>{statusMessage}</p>
+        )}
         <InputField 
           label="KAIST Email" 
           type="email" 
@@ -85,7 +110,20 @@ export default function Register() {
           onChange={(e) => setConfirmPassword(e.target.value)} 
           placeholder="confirm password"
         />
-        <SubmitButton text="REGISTER" icon={UserPlus} />
+        {isCodeSent && (
+          <InputField
+            label="Verification Code"
+            type="text"
+            value={code}
+            onChange={(e) => setCode(e.target.value)}
+            placeholder="6-digit code"
+          />
+        )}
+        <SubmitButton
+          text={isSubmitting ? 'PLEASE WAIT...' : isCodeSent ? 'CREATE ACCOUNT' : 'SEND VERIFICATION CODE'}
+          icon={UserPlus}
+          disabled={isSubmitting}
+        />
       </AuthForm>
       </div>
     </div>

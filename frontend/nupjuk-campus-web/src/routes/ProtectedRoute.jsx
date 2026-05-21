@@ -1,14 +1,34 @@
+import { useEffect, useState } from 'react';
 import { Navigate, Outlet } from 'react-router-dom';
+import { clearSession, getCurrentUser, hasSession } from '../api/auth';
 
 const ProtectedRoute = () => {
+    const [authState, setAuthState] = useState(() => hasSession() ? 'checking' : 'guest');
 
-    const isAuthenticated = true; 
+    useEffect(() => {
+        if (authState !== 'checking') return undefined;
 
-    // const token = localStorage.getItem('authToken');
-    // const isAuthenticated = !!token; // Converts the token string to a boolean
+        let isMounted = true;
 
-    // If the user is NOT authenticated, kick them back to the login page.
-    if (!isAuthenticated) {
+        getCurrentUser()
+            .then(() => {
+                if (isMounted) setAuthState('authenticated');
+            })
+            .catch(() => {
+                clearSession();
+                if (isMounted) setAuthState('guest');
+            });
+
+        return () => {
+            isMounted = false;
+        };
+    }, [authState]);
+
+    if (authState === 'checking') {
+        return <div style={{ padding: '2rem', textAlign: 'center' }}>Checking session...</div>;
+    }
+
+    if (authState === 'guest') {
         return <Navigate to="/login" replace />;
     }
 
