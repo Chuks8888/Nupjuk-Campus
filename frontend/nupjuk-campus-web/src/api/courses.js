@@ -104,7 +104,7 @@ export async function updateAssignmentStatus(courseId, assignmentId, status) {
   const response = await apiRequest(`/courses/${courseId}/assignments/${assignmentId}/status`, {
     method: 'POST',
     body: {
-      userCompletionStatus: status, // e.g., 'done', 'todo', 'completed'
+      userCompletionStatus: status, // possible: 'done' or 'todo' or 'completed', custom are possible but these are required for marking completion
     },
   });
 
