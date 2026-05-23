@@ -98,8 +98,70 @@
   cursor: pointer;
 
   transition: opacity 0.2s ease;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+}
+
+.login-button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  background-color: var(--text-muted);
 }
 
 .login-button:hover {
   opacity: 0.9;
+}
+
+.error-message {
+  color: var(--danger-text, #ef4444);
+  font-size: 0.875rem;
+  margin-top: 0.5rem;
+  text-align: center;
+}
+
+/* Auth Footer & Links */
+.auth-footer {
+  font-size: 0.9rem;
+  color: var(--text-body);
+}
+
+.auth-footer-container {
+  margin-top: 1rem;
+  text-align: center;
+}
+
+.auth-link {
+  color: var(--brand-blue);
+  text-decoration: none;
+  font-weight: 500;
+  transition: opacity 0.2s;
+}
+
+.auth-link:hover {
+  opacity: 0.8;
+}
+
+/* Status Messages */
+.status-message {
+  color: var(--success-text, #34c759); /* Define --success-text in index.css later */
+  font-size: 0.875rem;
+  margin: 0;
+}
+
+/* Success UI wrapper */
+.success-container {
+  text-align: center;
+  padding: 2rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1rem;
+}
+
+.success-container p {
+  line-height: 1.5;
+  color: var(--text-body);
 }
