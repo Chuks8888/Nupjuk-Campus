@@ -19,10 +19,11 @@ function normalizeCourse(course) {
 
 function normalizeAssignment(assignment) {
   const status = assignment.userStatuses?.[0];
-  const completionStatus = status?.userCompletionStatus
-    ?? assignment.userCompletionStatus
-    ?? assignment.user_completion_status
-    ?? 'todo';
+  const completionStatus =
+    status?.userCompletionStatus ??
+    assignment.userCompletionStatus ??
+    assignment.user_completion_status ??
+    'todo';
 
   return {
     id: String(assignment.id),
@@ -97,4 +98,15 @@ export async function getCoursePosts(courseId) {
 export async function getCourseMeetings(courseId) {
   const meetings = await apiRequest(`/meetings/course/${courseId}`);
   return meetings.map(normalizeMeeting);
+}
+
+export async function updateAssignmentStatus(courseId, assignmentId, status) {
+  const response = await apiRequest(`/courses/${courseId}/assignments/${assignmentId}/status`, {
+    method: 'POST',
+    body: {
+      userCompletionStatus: status, // e.g., 'done', 'todo', 'completed'
+    },
+  });
+
+  return response;
 }
