@@ -1,9 +1,8 @@
-/* src/styles/Courses.css */
 .courses-container {
   padding: 1.5rem;
   max-width: 800px;
   margin: 0 auto;
-  font-family: sans-serif;
+  font-family: var(--sans);
   min-height: 90vh;
 }
 
@@ -14,11 +13,11 @@
 .courses-header h1 {
   margin: 0;
   font-size: 1.75rem;
-  color: var(--text-primary, #1c1c1e);
+  color: var(--text-strong);
 }
 
 .courses-header .semester-text {
-  color: var(--text-secondary, #8e8e93);
+  color: var(--text-muted);
   margin: 0.25rem 0 1rem 0;
 }
 
@@ -32,24 +31,28 @@
   left: 12px;
   top: 50%;
   transform: translateY(-50%);
-  color: #8e8e93;
+  color: var(--text-muted);
 }
 
 .search-input {
   width: 100%;
   padding: 0.75rem 1rem 0.75rem 2.5rem;
   border-radius: 8px;
-  border: 1px solid var(--border-color, #e5e5ea);
-  background-color: var(--container-bg, #fcfcfc);
+  border: 1px solid var(--border-main);
+  background-color: var(--bg-surface);
   font-size: 1rem;
-  color: var(--text-primary, #1c1c1e);
-  transition: border-color 0.2s ease;
+  font-family: var(--sans);
+  color: var(--text-body);
+  transition:
+    border-color 0.2s ease,
+    box-shadow 0.2s ease;
   box-sizing: border-box;
 }
 
 .search-input:focus {
   outline: none;
-  border-color: #007AFF;
+  border-color: var(--brand-blue);
+  box-shadow: 0 0 0 4px var(--nav-active-bg);
 }
 
 .course-list {
@@ -60,6 +63,6 @@
 
 .empty-state {
   text-align: center;
-  color: var(--text-secondary, #8e8e93);
+  color: var(--text-muted);
   margin-top: 2rem;
 }
