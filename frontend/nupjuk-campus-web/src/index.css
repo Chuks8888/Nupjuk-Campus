@@ -9,6 +9,10 @@
   --text-body: #1c1c1e;
   --text-muted: #8e8e93;
 
+  /* Check marks */
+  --success-text: #34c759;
+  --success-bg: #e4f8eb;
+
   /* Borders & Shadows */
   --border-main: #e5e5ea;
   --shadow-sm: rgba(0, 0, 0, 0.1) 0 10px 15px -3px, rgba(0, 0, 0, 0.05) 0 4px 6px -2px;
@@ -37,6 +41,9 @@
     --text-strong: #f3f4f6;
     --text-body: #d1d5db;
     --text-muted: #9ca3af;
+
+    --success-text: #32d74b;
+    --success-bg: rgba(52, 199, 89, 0.15);
 
     --border-main: #2e303a;
     --shadow-sm: rgba(0, 0, 0, 0.4) 0 10px 15px -3px, rgba(0, 0, 0, 0.25) 0 4px 6px -2px;

@@ -19,29 +19,19 @@ export default function AssignmentWidget({ assignments }) {
       await updateAssignmentStatus(courseId, assignmentId, newStatus);
     } catch (error) {
       console.error('Failed to update assignment status:', error);
+      throw error;
     }
   };
 
   return (
     <div className="widget-container">
-      <div
-        style={{
-          display: 'flex',
-          justifyContent: 'space-between',
-          alignItems: 'baseline',
-          marginBottom: '1rem',
-        }}
-      >
+      <div className="section-header">
         <h2>Upcoming Deadlines</h2>
-        <span style={{ fontSize: '0.9rem', color: '#007AFF', cursor: 'pointer' }}>
-          Calendar &gt;
-        </span>
+        <span className="action-text">Calendar &gt;</span>
       </div>
 
       {upcomingAssignments.length === 0 ? (
-        <p style={{ color: 'var(--text-secondary)' }}>
-          No assignments due in the next 7 days. Enjoy!
-        </p>
+        <p style={{ color: 'var(--text-muted)' }}>No assignments due in the next 7 days. Enjoy!</p>
       ) : (
         <div className="cards-container">
           {upcomingAssignments.map((assignment) => (

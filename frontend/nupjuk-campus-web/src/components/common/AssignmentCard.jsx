@@ -45,11 +45,19 @@ export default function AssignmentCard({ assignment, onStatusChange }) {
     return () => clearInterval(timer);
   }, [dueDate]);
 
-  const handleStatusChange = (e) => {
+  const handleStatusChange = async (e) => {
     const newStatus = e.target.value;
+    const previousStatus = userStatus;
+
     setUserStatus(newStatus);
+
     if (onStatusChange) {
-      onStatusChange(assignment.id, newStatus);
+      try {
+        await onStatusChange(assignment.id, newStatus);
+      } catch (err) {
+        setUserStatus(previousStatus);
+        alert('Failed to sync with server. Please try again');
+      }
     }
   };
 
@@ -77,9 +85,9 @@ export default function AssignmentCard({ assignment, onStatusChange }) {
         aria-label="Toggle completion status"
       >
         {isCompleted ? (
-          <CheckCircle2 size={24} color="#34C759" />
+          <CheckCircle2 size={24} color="var(--success-text)" />
         ) : (
-          <Circle size={24} color="#C7C7CC" />
+          <Circle size={24} color="var(--text-muted)" />
         )}
       </button>
 

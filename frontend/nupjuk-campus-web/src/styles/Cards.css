@@ -225,8 +225,8 @@
 
 .klms-badge.submitted,
 .klms-badge.graded {
-  background: #e4f8eb;
-  color: #34c759;
+  background: var(--success-bg);
+  color: var(--success-text);
 }
 
 .klms-badge.unsubmitted,
