@@ -1,29 +1,29 @@
 import { MessageSquare, Paperclip } from 'lucide-react';
+import DetailCard from '../common/DetailCard';
 
 export default function CourseBoard({ posts }) {
-  if (!posts || posts.length === 0) {
-    return <p className="empty-state">No posts yet.</p>;
-  }
+  if (!posts || posts.length === 0) return <p className="empty-state">No posts yet.</p>;
 
   return (
-    <div className="course-board-list">
+    <div className="detail-list-container">
       {posts.map((post) => (
-        <article className="board-post-card" key={post.id}>
-          <div className="board-post-header">
-            <span className="board-post-category">{post.category}</span>
-            <span className="board-post-author">{post.author_name}</span>
-          </div>
-          <h3>{post.title}</h3>
-          <p>{post.body}</p>
-          <div className="board-post-meta">
-            <span>
+        <DetailCard
+          key={post.id}
+          category={post.category}
+          author={post.author_name}
+          title={post.title}
+          description={post.body}
+          metaLeft={
+            <>
               <MessageSquare size={14} /> {post.comment_count}
-            </span>
-            <span>
+            </>
+          }
+          metaRight={
+            <>
               <Paperclip size={14} /> {post.attachment_count}
-            </span>
-          </div>
-        </article>
+            </>
+          }
+        />
       ))}
     </div>
   );

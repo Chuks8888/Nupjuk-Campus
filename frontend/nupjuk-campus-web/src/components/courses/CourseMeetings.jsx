@@ -1,25 +1,37 @@
+import { Clock, Users } from 'lucide-react'; // Added icons for visual consistency!
+import DetailCard from '../common/DetailCard';
+
 export default function CourseMeetings({ meetings }) {
-  if (!meetings || meetings.length === 0) {
-    return <p className="empty-state">No meetings yet.</p>;
-  }
+  const formatTime = (isoString) => {
+    return new Date(isoString).toLocaleTimeString('en-US', {
+      hour: '2-digit',
+      minute: '2-digit',
+    });
+  };
+
+  if (!meetings || meetings.length === 0) return <p className="empty-state">No meetings yet.</p>;
 
   return (
-    <div className="course-board-list">
+    <div className="detail-list-container">
       {meetings.map((meeting) => (
-        <article className="board-post-card" key={meeting.id}>
-          <div className="board-post-header">
-            <span className="board-post-category">{meeting.status}</span>
-            <span className="board-post-author">{meeting.creator_name}</span>
-          </div>
-          <h3>{meeting.title}</h3>
-          <p>{meeting.description || 'No description.'}</p>
-          <div className="board-post-meta">
-            <span>
-              {meeting.time_range_start} - {meeting.time_range_end}
-            </span>
-            <span>{meeting.participant_count} participants</span>
-          </div>
-        </article>
+        <DetailCard
+          key={meeting.id}
+          category={meeting.status}
+          author={meeting.creator_name}
+          title={meeting.title}
+          description={meeting.description || 'No description.'}
+          metaLeft={
+            <>
+              <Clock size={14} /> {formatTime(meeting.time_range_start)} -{' '}
+              {formatTime(meeting.time_range_end)}
+            </>
+          }
+          metaRight={
+            <>
+              <Users size={14} /> {meeting.participant_count} participants
+            </>
+          }
+        />
       ))}
     </div>
   );

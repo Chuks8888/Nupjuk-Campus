@@ -12,6 +12,7 @@ import {
   getCoursePosts,
   updateAssignmentStatus,
 } from '../api/courses';
+import { getPrefixColor } from '../utils/colorUtils';
 import '../styles/CourseDetail.css';
 import '../styles/Cards.css';
 
@@ -53,6 +54,8 @@ export default function CourseDetail() {
   }, [courseId]);
 
   const handleAssignmentStatusChange = async (assignmentId, newStatus) => {
+    const previousAssignments = [...assignments];
+
     try {
       setAssignments((prevAssignments) =>
         prevAssignments.map((a) =>
@@ -62,6 +65,8 @@ export default function CourseDetail() {
 
       await updateAssignmentStatus(courseId, assignmentId, newStatus);
     } catch (error) {
+      setAssignments(previousAssignments);
+      alert('Failed to save assignment status. Please try again.');
       console.error('Failed to sync status with server:', error);
     }
   };
@@ -79,7 +84,7 @@ export default function CourseDetail() {
           <ArrowLeft size={24} />
         </button>
 
-        <div className="course-header-icon" style={{ backgroundColor: '#007AFF' }}>
+        <div className="course-header-icon" style={{ backgroundColor: getPrefixColor(prefix) }}>
           {prefix}
         </div>
 
