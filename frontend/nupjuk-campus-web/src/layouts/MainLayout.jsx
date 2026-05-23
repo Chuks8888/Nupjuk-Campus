@@ -11,6 +11,14 @@ import {
 import { clearSession } from '../api/auth';
 import '../styles/MainLayout.css';
 
+const NAV_ITEMS = [
+  { path: '/home', icon: HomeIcon, label: 'Home' },
+  { path: '/courses', icon: BookOpen, label: 'Courses' },
+  { path: '/calendar', icon: Calendar, label: 'Calendar' },
+  { path: '/meetings', icon: Users, label: 'Meetings' },
+  { path: '/alerts', icon: Bell, label: 'Alerts' },
+];
+
 export default function MainLayout() {
   const navigate = useNavigate();
 
@@ -33,31 +41,12 @@ export default function MainLayout() {
         </div>
 
         <nav className="sidebar-nav">
-          <NavLink to="/home" className="nav-item">
-            <HomeIcon size={24} />
-            <span className="nav-label">Home</span>
-          </NavLink>
-
-          <NavLink to="/courses" className="nav-item">
-            <BookOpen size={24} />
-            <span className="nav-label">Courses</span>
-          </NavLink>
-
-          <NavLink to="/calendar" className="nav-item">
-            <Calendar size={24} />
-            <span className="nav-label">Calendar</span>
-          </NavLink>
-
-          <NavLink to="/meetings" className="nav-item">
-            <Users size={24} />
-            <span className="nav-label">Meetings</span>
-          </NavLink>
-
-          <NavLink to="/alerts" className="nav-item">
-            <Bell size={24} />
-            <span className="nav-label">Alerts</span>
-          </NavLink>
-
+          {NAV_ITEMS.map(({ path, icon: Icon, label }) => (
+            <NavLink key={path} to={path} className="nav-item">
+              <Icon size={24} />
+              <span className="nav-label">{label}</span>
+            </NavLink>
+          ))}
           <button onClick={handleLogout} className="nav-item logout-btn">
             <LogOut size={24} />
             <span className="nav-label">Log Out</span>
