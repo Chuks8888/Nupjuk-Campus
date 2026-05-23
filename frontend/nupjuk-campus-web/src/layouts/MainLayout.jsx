@@ -58,17 +58,16 @@ export default function MainLayout() {
             <span className="nav-label">Alerts</span>
           </NavLink>
 
+          <button onClick={handleLogout} className="nav-item logout-btn">
+            <LogOut size={24} />
+            <span className="nav-label">Log Out</span>
+          </button>
           <div className="sidebar-bottom">
             <div className="user-section">
               <div className="user-info">
                 Logged in as <br />
                 <strong>{displayName}</strong>
               </div>
-
-              <button onClick={handleLogout} className="nav-item logout-btn">
-                <LogOut size={24} />
-                <span className="nav-label">Log Out</span>
-              </button>
             </div>
           </div>
         </nav>

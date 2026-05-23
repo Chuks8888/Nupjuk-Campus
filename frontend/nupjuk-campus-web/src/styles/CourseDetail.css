@@ -26,7 +26,7 @@
 }
 
 .course-header-icon {
-  background-color: #34C759; /* Default green, can be overridden inline if dynamic */
+  background-color: #34c759; /* Default green, can be overridden inline if dynamic */
   color: white;
   width: 48px;
   height: 48px;
@@ -43,6 +43,7 @@
   margin: 0 0 0.25rem 0;
   font-size: 1.25rem;
   color: var(--text-primary, #1c1c1e);
+  text-align: left;
 }
 
 .course-header-info .course-name {
@@ -93,8 +94,8 @@
 }
 
 .course-tab-button.active {
-  border-bottom: 2px solid #007AFF;
-  color: #007AFF;
+  border-bottom: 2px solid #007aff;
+  color: #007aff;
   font-weight: 600;
 }
 
@@ -128,7 +129,7 @@
 }
 
 .board-post-category {
-  color: #007AFF;
+  color: #007aff;
   font-weight: 600;
 }
 
