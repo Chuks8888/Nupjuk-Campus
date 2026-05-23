@@ -1,15 +1,23 @@
 /* The main wrapper filling the whole screen */
 .app-layout {
   display: flex;
-  min-height: 100vh;
-  background-color: #f5f5f7;
+  height: 100vh;
+  overflow: hidden;
+  background-color: var(--layout-bg);
+}
+
+/* Main Content Area */
+.main-content {
+  flex: 1;
+  padding: 2rem 3rem;
+  overflow-y: auto;
 }
 
 /* Sidebar styling */
 .sidebar {
   width: 250px;
-  background-color: white;
-  border-right: 1px solid #e5e5ea;
+  background-color: var(--sidebar-bg);
+  border-right: 1px solid var(--sidebar-border);
   display: flex;
   flex-direction: column;
   padding: 1.5rem 1rem;
@@ -29,7 +37,7 @@
 .sidebar-brand h2 {
   margin: 0;
   font-size: 1.5rem;
-  color: #1c1c1e;
+  color: var(--text-main);
 }
 
 .sidebar-nav {
@@ -44,27 +52,20 @@
   gap: 1rem;
   padding: 0.75rem 1rem;
   border-radius: 8px;
-  color: #8e8e93;
+  color: var(--text-muted);
   text-decoration: none;
   font-weight: 500;
   transition: all 0.2s ease;
 }
 
 .nav-item:hover {
-  background-color: #f2f2f7;
-  color: #1c1c1e;
+  background-color: var(--nav-hover);
+  color: var(--text-main);
 }
 
 .nav-item.active {
-  background-color: #e5f1ff;
-  color: #007aff;
-}
-
-/* Main Content Area */
-.main-content {
-  flex: 1;
-  padding: 2rem 3rem;
-  overflow-y: auto;
+  background-color: var(--nav-active-bg);
+  color: var(--nav-active-text);
 }
 
 /* --- NEW: Bottom Section Styling --- */
@@ -79,7 +80,7 @@
 
 .user-info {
   font-size: 0.85rem;
-  color: #8e8e93;
+  color: var(--text-muted);
   padding: 0 1rem;
   line-height: 1.4;
   word-break: break-all;
@@ -88,7 +89,7 @@
 
 .user-info strong {
   display: block;
-  color: #1c1c1e;
+  color: var(--text-main);
   font-weight: 500;
 }
 
@@ -99,6 +100,7 @@
   font-family: inherit;
   font-size: 1rem;
   cursor: pointer;
+  color: var(--text-muted);
 }
 
 .logout-btn:hover {

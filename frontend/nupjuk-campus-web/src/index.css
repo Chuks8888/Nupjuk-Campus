@@ -16,6 +16,15 @@
   --social-bg: rgba(244, 243, 236, 0.5);
   --shadow: rgba(0, 0, 0, 0.1) 0 10px 15px -3px, rgba(0, 0, 0, 0.05) 0 4px 6px -2px;
 
+  --sidebar-bg: #ffffff;
+  --sidebar-border: #e5e5ea;
+  --layout-bg: #f5f5f7;
+  --text-main: #1c1c1e;
+  --text-muted: #8e8e93;
+  --nav-hover: #f2f2f7;
+  --nav-active-bg: #e5f1ff;
+  --nav-active-text: #007aff;
+
   --sans: system-ui, 'Segoe UI', Roboto, sans-serif;
   --heading: system-ui, 'Segoe UI', Roboto, sans-serif;
   --mono: ui-monospace, Consolas, monospace;
@@ -52,6 +61,15 @@
     --accent-border: rgba(192, 132, 252, 0.5);
     --social-bg: rgba(47, 48, 58, 0.5);
     --shadow: rgba(0, 0, 0, 0.4) 0 10px 15px -3px, rgba(0, 0, 0, 0.25) 0 4px 6px -2px;
+
+    --sidebar-bg: #16171d;
+    --sidebar-border: #2e303a;
+    --layout-bg: #1a1a1a;
+    --text-main: #f3f4f6;
+    --text-muted: #9ca3af;
+    --nav-hover: #2e303a;
+    --nav-active-bg: rgba(192, 132, 252, 0.15);
+    --nav-active-text: #c084fc;
   }
 
   #social .button-icon {
@@ -61,9 +79,9 @@
 
 body {
   margin: 0;
-  min-height: 100vh;
+  height: 100vh;
   position: relative;
-  overflow-x: hidden;
+  overflow: hidden;
 
   /* background-color: var(--bg-color); */
   color: var(--text-primary);
@@ -96,10 +114,11 @@ body::before {
   margin: 0 auto;
   text-align: center;
   border-inline: 1px solid var(--border);
-  min-height: 100svh;
+  height: 100vh;
   display: flex;
   flex-direction: column;
   box-sizing: border-box;
+  overflow: hidden;
 }
 
 h1,
