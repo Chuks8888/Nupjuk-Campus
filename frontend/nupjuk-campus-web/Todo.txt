@@ -1,0 +1,29 @@
+Course Post Board
+Build a fully-featured, categorized discussion board to facilitate course-specific communication, Q&A, and peer collaboration.
+
+    Implement basic CRUD (Create, Read, Update, Delete) for posts, deferring file attachments for a later phase.
+
+    Build a dedicated detail view sub-page for reading full posts and threads.
+
+    Implement CRUD operations for comments within the post detail view.
+
+    Add a search function to filter the board by title, content, or author.
+
+    Introduce an upvote/like system for both posts and comments.
+
+    Implement a tagging system to categorize posts (e.g., Q&A, Team Recruitment, General, Resources).
+
+Calendar View Page
+Develop a multi-view interactive calendar to visually unify academic deadlines, scheduled meetings, and custom personal events.
+
+    Build toggle controls to switch the calendar between monthly, weekly, and daily views.
+
+    Apply course-specific color-coding to all synced events and assignments.
+
+    Enable a click-to-add interaction directly on the calendar grid for creating personal schedules (e.g., exams, project milestones).
+
+    Create a dedicated form interface (sub-page or modal) for editing custom personal events.
+
+    Apply distinct visual indicators to clearly differentiate assignments, meetings, and personal events.
+
+    Implement a secondary list view below the main calendar to detail all events for the currently selected day.
