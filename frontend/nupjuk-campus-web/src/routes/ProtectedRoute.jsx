@@ -3,36 +3,36 @@ import { Navigate, Outlet } from 'react-router-dom';
 import { clearSession, getCurrentUser, hasSession } from '../api/auth';
 
 const ProtectedRoute = () => {
-    const [authState, setAuthState] = useState(() => hasSession() ? 'checking' : 'guest');
+  const [authState, setAuthState] = useState(() => (hasSession() ? 'checking' : 'guest'));
 
-    useEffect(() => {
-        if (authState !== 'checking') return undefined;
+  useEffect(() => {
+    if (authState !== 'checking') return undefined;
 
-        let isMounted = true;
+    let isMounted = true;
 
-        getCurrentUser()
-            .then(() => {
-                if (isMounted) setAuthState('authenticated');
-            })
-            .catch(() => {
-                clearSession();
-                if (isMounted) setAuthState('guest');
-            });
+    getCurrentUser()
+      .then(() => {
+        if (isMounted) setAuthState('authenticated');
+      })
+      .catch(() => {
+        clearSession();
+        if (isMounted) setAuthState('guest');
+      });
 
-        return () => {
-            isMounted = false;
-        };
-    }, [authState]);
+    return () => {
+      isMounted = false;
+    };
+  }, [authState]);
 
-    if (authState === 'checking') {
-        return <div style={{ padding: '2rem', textAlign: 'center' }}>Checking session...</div>;
-    }
+  if (authState === 'checking') {
+    return <div style={{ padding: '2rem', textAlign: 'center' }}>Checking session...</div>;
+  }
 
-    if (authState === 'guest') {
-        return <Navigate to="/login" replace />;
-    }
+  if (authState === 'guest') {
+    return <Navigate to="/login" replace />;
+  }
 
-    return <Outlet />;
+  return <Outlet />;
 };
 
 export default ProtectedRoute;
