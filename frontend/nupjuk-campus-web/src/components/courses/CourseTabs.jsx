@@ -4,7 +4,7 @@ export default function CourseTabs({ activeTab, onTabChange }) {
   const tabs = [
     { id: 'board', label: 'Board', icon: FileText },
     { id: 'tasks', label: 'Tasks', icon: Calendar },
-    { id: 'meetings', label: 'Meetings', icon: Users }
+    { id: 'meetings', label: 'Meetings', icon: Users },
   ];
 
   return (
