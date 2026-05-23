@@ -31,7 +31,7 @@ export default function AssignmentWidget({ assignments }) {
       </div>
 
       {upcomingAssignments.length === 0 ? (
-        <p style={{ color: 'var(--text-muted)' }}>No assignments due in the next 7 days. Enjoy!</p>
+        <p className="empty-state">No assignments due in the next 7 days. Enjoy!</p>
       ) : (
         <div className="cards-container">
           {upcomingAssignments.map((assignment) => (

@@ -145,3 +145,32 @@ code {
   padding: 4px 8px;
   background: var(--code-bg);
 }
+
+.empty-state {
+  color: var(--text-muted);
+  font-size: 0.95rem;
+  text-align: center; /* or left, depending on preference */
+  padding: 1rem 0;
+}
+
+/* Global Page Header */
+.page-header {
+  /* display: flex; */
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 2rem;
+  padding-bottom: 1rem;
+  border-bottom: 1px solid var(--border-main);
+  text-align: left;
+}
+
+.page-header h1 {
+  margin: 0;
+  font-size: 1.5rem; /* Standardizing your page title size */
+  color: var(--text-strong);
+}
+
+.page-header-subtitle {
+  color: var(--text-muted);
+  font-size: 0.95rem;
+}

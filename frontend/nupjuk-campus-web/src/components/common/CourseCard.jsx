@@ -18,7 +18,7 @@ export default function CourseCard({ course }) {
         <p>{course.course_name}</p>
       </div>
 
-      <ChevronRight color="#c7c7cc" />
+      <ChevronRight color="var(--text-muted)" />
     </div>
   );
 }

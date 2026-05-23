@@ -60,9 +60,3 @@
   flex-direction: column;
   gap: 1rem;
 }
-
-.empty-state {
-  text-align: center;
-  color: var(--text-muted);
-  margin-top: 2rem;
-}

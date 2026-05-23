@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
+import { getCourseAssignments, getCourses } from '../api/courses';
 import CourseCard from '../components/common/CourseCard';
 import AssignmentWidget from '../components/dashboard/AssignmentWidget';
-import { getCourseAssignments, getCourses } from '../api/courses';
 
 import '../styles/Home.css';
 import '../styles/Cards.css';
@@ -52,22 +52,24 @@ export default function Home() {
 
   return (
     <div className="home-container">
-      {error && <p className="empty-state">{error}</p>}
+      <header className="page-header">
+        {error && <p className="empty-state">{error}</p>}
 
-      <AssignmentWidget assignments={dashboardData.assignments} />
+        <AssignmentWidget assignments={dashboardData.assignments} />
 
-      <section className="dashboard-section">
-        <div className="section-header">
-          <h2>My Courses</h2>
-          <span className="meta-text">{dashboardData.courses.length} enrolled</span>
-        </div>
+        <section className="dashboard-section">
+          <div className="section-header">
+            <h2>My Courses</h2>
+            <span className="meta-text">{dashboardData.courses.length} enrolled</span>
+          </div>
 
-        <div className="cards-container">
-          {dashboardData.courses.map((course) => (
-            <CourseCard key={course.id} course={course} />
-          ))}
-        </div>
-      </section>
+          <div className="cards-container">
+            {dashboardData.courses.map((course) => (
+              <CourseCard key={course.id} course={course} />
+            ))}
+          </div>
+        </section>
+      </header>
     </div>
   );
 }
