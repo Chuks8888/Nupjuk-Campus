@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useParams, useNavigate, useLocation } from 'react-router-dom';
 import { ArrowLeft, Users } from 'lucide-react';
 import CourseTabs from '../components/courses/CourseTabs';
 import CourseBoard from '../components/courses/CourseBoard';
@@ -19,7 +19,8 @@ import '../styles/Cards.css';
 export default function CourseDetail() {
   const { courseId } = useParams();
   const navigate = useNavigate();
-  const [activeTab, setActiveTab] = useState('tasks');
+  const location = useLocation();
+  const [activeTab, setActiveTab] = useState(location.state?.activeTab || 'tasks');
   const [course, setCourse] = useState(null);
   const [assignments, setAssignments] = useState([]);
   const [posts, setPosts] = useState([]);
@@ -103,7 +104,7 @@ export default function CourseDetail() {
       <CourseTabs activeTab={activeTab} onTabChange={setActiveTab} />
 
       <div className="tab-content">
-        {activeTab === 'board' && <CourseBoard posts={posts} />}
+        {activeTab === 'board' && <CourseBoard courseId={courseId} posts={posts} />}
 
         {activeTab === 'tasks' && (
           <CourseTasks assignments={assignments} onStatusChange={handleAssignmentStatusChange} />

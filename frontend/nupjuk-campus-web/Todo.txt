@@ -1,17 +1,5 @@
 Course Post Board
-Build a fully-featured, categorized discussion board to facilitate course-specific communication, Q&A, and peer collaboration.
-
-    Implement basic CRUD (Create, Read, Update, Delete) for posts, deferring file attachments for a later phase.
-
-    Build a dedicated detail view sub-page for reading full posts and threads.
-
-    Implement CRUD operations for comments within the post detail view.
-
-    Add a search function to filter the board by title, content, or author.
-
-    Introduce an upvote/like system for both posts and comments.
-
-    Implement a tagging system to categorize posts (e.g., Q&A, Team Recruitment, General, Resources).
+Attachements and upvotes
 
 Calendar View Page
 Develop a multi-view interactive calendar to visually unify academic deadlines, scheduled meetings, and custom personal events.
