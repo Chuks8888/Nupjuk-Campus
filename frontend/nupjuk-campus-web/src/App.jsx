@@ -6,6 +6,7 @@ import Courses from './pages/Courses';
 import CourseDetail from './pages/CourseDetail';
 import PostDetail from './pages/PostDetail';
 import PostForm from './components/board/PostForm';
+import Calendar from './pages/Calendar';
 
 import MainLayout from './layouts/MainLayout';
 import ProtectedRoute from './routes/ProtectedRoute';
@@ -19,7 +20,6 @@ function App() {
 
         <Route element={<ProtectedRoute />}>
           <Route element={<MainLayout />}>
-            {/* The root "/" now redirects to /home IF authenticated */}
             <Route path="/" element={<Navigate to="/home" replace />} />
             <Route path="/home" element={<Home />} />
             <Route path="/courses" element={<Courses />} />
@@ -27,10 +27,10 @@ function App() {
             <Route path="/courses/:courseId/posts/:postId" element={<PostDetail />} />
             <Route path="/courses/:courseId/posts/new" element={<PostForm />} />
             <Route path="/courses/:courseId/posts/:postId/edit" element={<PostForm />} />
+            <Route path="/calendar" element={<Calendar />} />
           </Route>
         </Route>
 
-        {/* Catch-all route for 404 pages */}
         <Route path="*" element={<h1>404 - Page Not Found</h1>} />
       </Routes>
     </Router>
