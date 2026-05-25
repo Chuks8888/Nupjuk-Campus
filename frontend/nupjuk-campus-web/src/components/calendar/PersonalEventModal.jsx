@@ -17,24 +17,32 @@ export default function PersonalEventModal({
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
 
+  const toLocalDatetimeString = (dateObj) => {
+    if (!dateObj) return '';
+    const d = new Date(dateObj);
+    const pad = (n) => String(n).padStart(2, '0');
+    return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
+  };
+
   useEffect(() => {
     if (existingEvent) {
       setFormData({
         title: existingEvent.title,
-        startTime: new Date(existingEvent.start).toISOString().slice(0, 16),
-        endTime: new Date(existingEvent.end).toISOString().slice(0, 16),
+        startTime: toLocalDatetimeString(existingEvent.start),
+        endTime: toLocalDatetimeString(existingEvent.end),
         description: existingEvent.description || '',
       });
     } else if (selectedDate) {
       const start = new Date(selectedDate);
       start.setHours(9, 0, 0, 0);
+
       const end = new Date(selectedDate);
       end.setHours(10, 0, 0, 0);
 
       setFormData({
         title: '',
-        startTime: start.toISOString().slice(0, 16),
-        endTime: end.toISOString().slice(0, 16),
+        startTime: toLocalDatetimeString(start),
+        endTime: toLocalDatetimeString(end),
         description: '',
       });
     }
@@ -42,17 +50,42 @@ export default function PersonalEventModal({
 
   if (!isOpen) return null;
 
-  const handleChange = (e) => setFormData((prev) => ({ ...prev, [e.target.name]: e.target.value }));
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+
+    setFormData((prev) => {
+      const newData = { ...prev, [name]: value };
+
+      if (name === 'startTime' && newData.endTime) {
+        const newStart = new Date(value);
+        const currentEnd = new Date(newData.endTime);
+
+        if (newStart >= currentEnd) {
+          newStart.setHours(newStart.getHours() + 1);
+          newData.endTime = toLocalDatetimeString(newStart);
+        }
+      }
+
+      return newData;
+    });
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setIsSubmitting(true);
+
+    const payload = {
+      ...formData,
+      startTime: new Date(formData.startTime).toISOString(),
+      endTime: new Date(formData.endTime).toISOString(),
+    };
+
     try {
       if (existingEvent) {
         const dbId = existingEvent.id.replace('personal-', '');
-        await updatePersonalEvent(dbId, formData);
+        await updatePersonalEvent(dbId, payload);
       } else {
-        await createPersonalEvent(formData);
+        await createPersonalEvent(payload);
       }
       onEventSaved();
       onClose();
@@ -82,12 +115,12 @@ export default function PersonalEventModal({
       <div className="modal-content">
         <div className="modal-header">
           <h2>{existingEvent ? 'Edit Event' : 'New Personal Event'}</h2>
-          <button onClick={onClose} className="modal-close-btn">
+          <button onClick={onClose} className="icon-button">
             <X size={24} />
           </button>
         </div>
 
-        <form onSubmit={handleSubmit}>
+        <form onSubmit={handleSubmit} className="modal-form">
           <div className="form-group">
             <label>Title</label>
             <input
@@ -130,8 +163,7 @@ export default function PersonalEventModal({
               name="description"
               value={formData.description}
               onChange={handleChange}
-              className="form-input"
-              style={{ minHeight: '100px', resize: 'vertical', paddingTop: '0.75rem' }}
+              className="form-input textarea-input"
             />
           </div>
 
