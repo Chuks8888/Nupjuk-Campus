@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { ArrowLeft, Save, X } from 'lucide-react';
 import { createPost, updatePost, getPostDetail } from '../../api/board';
+import '../../styles/Board.css';
 
 const ALLOWED_CATEGORIES = ['GENERAL', 'QUESTION', 'ASSIGNMENT', 'EXAM', 'PROJECT'];
 
@@ -10,11 +11,7 @@ export default function PostForm() {
   const navigate = useNavigate();
   const isEditing = Boolean(postId);
 
-  const [formData, setFormData] = useState({
-    title: '',
-    category: 'GENERAL',
-    body: '',
-  });
+  const [formData, setFormData] = useState({ title: '', category: 'GENERAL', body: '' });
   const [isLoading, setIsLoading] = useState(isEditing);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState('');
@@ -24,11 +21,7 @@ export default function PostForm() {
       const fetchExistingPost = async () => {
         try {
           const data = await getPostDetail(courseId, postId);
-          setFormData({
-            title: data.title,
-            category: data.category,
-            body: data.body,
-          });
+          setFormData({ title: data.title, category: data.category, body: data.body });
         } catch (err) {
           setError('Failed to load the post for editing.');
         } finally {
@@ -64,160 +57,89 @@ export default function PostForm() {
     }
   };
 
-  if (isLoading) return <div>Loading post data...</div>;
+  if (isLoading) return <div className="post-container">Loading post data...</div>;
 
   return (
-    <div
-      className="post-form-container"
-      style={{ maxWidth: '800px', margin: '0 auto', padding: '2rem' }}
-    >
+    <div className="post-container">
       <button
         onClick={() =>
           isEditing
             ? navigate(`/courses/${courseId}/posts/${postId}`)
             : navigate(`/courses/${courseId}`, { state: { activeTab: 'board' } })
         }
-        style={{
-          display: 'flex',
-          alignItems: 'center',
-          gap: '0.5rem',
-          marginBottom: '2rem',
-          background: 'none',
-          border: 'none',
-          cursor: 'pointer',
-        }}
+        className="back-button board-back-btn"
       >
         <ArrowLeft size={20} /> Back
       </button>
 
-      <h2>{isEditing ? 'Edit Post' : 'Create New Post'}</h2>
+      <div className="post-content-card">
+        <h2 className="board-page-title">{isEditing ? 'Edit Post' : 'Create New Post'}</h2>
 
-      {error && (
-        <div
-          style={{ color: 'red', marginBottom: '1rem', padding: '1rem', backgroundColor: '#fee' }}
-        >
-          {error}
-        </div>
-      )}
+        {error && <div className="board-error-banner">{error}</div>}
 
-      <form
-        onSubmit={handleSubmit}
-        style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem', marginTop: '1.5rem' }}
-      >
-        <div style={{ display: 'flex', gap: '1rem' }}>
-          <div style={{ flex: 2 }}>
-            <label
-              htmlFor="title"
-              style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 'bold' }}
-            >
-              Title
+        <form onSubmit={handleSubmit} className="board-form-layout">
+          <div className="board-form-row">
+            <div className="board-form-group title-group">
+              <label htmlFor="title" className="board-form-label">
+                Title
+              </label>
+              <input
+                id="title"
+                name="title"
+                type="text"
+                required
+                value={formData.title}
+                onChange={handleChange}
+                placeholder="Keep it clear and concise"
+                className="board-input"
+              />
+            </div>
+
+            <div className="board-form-group category-group">
+              <label htmlFor="category" className="board-form-label">
+                Category
+              </label>
+              <select
+                id="category"
+                name="category"
+                value={formData.category}
+                onChange={handleChange}
+                className="board-input"
+              >
+                {ALLOWED_CATEGORIES.map((cat) => (
+                  <option key={cat} value={cat}>
+                    {cat}
+                  </option>
+                ))}
+              </select>
+            </div>
+          </div>
+
+          <div className="board-form-group">
+            <label htmlFor="body" className="board-form-label">
+              Details
             </label>
-            <input
-              id="title"
-              name="title"
-              type="text"
+            <textarea
+              id="body"
+              name="body"
               required
-              value={formData.title}
+              value={formData.body}
               onChange={handleChange}
-              placeholder="Keep it clear and concise"
-              style={{
-                width: '100%',
-                padding: '0.75rem',
-                borderRadius: '4px',
-                border: '1px solid #ccc',
-              }}
+              placeholder="Write the details of your post here..."
+              className="board-input board-textarea-large"
             />
           </div>
 
-          <div style={{ flex: 1 }}>
-            <label
-              htmlFor="category"
-              style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 'bold' }}
-            >
-              Category
-            </label>
-            <select
-              id="category"
-              name="category"
-              value={formData.category}
-              onChange={handleChange}
-              style={{
-                width: '100%',
-                padding: '0.75rem',
-                borderRadius: '4px',
-                border: '1px solid #ccc',
-              }}
-            >
-              {ALLOWED_CATEGORIES.map((cat) => (
-                <option key={cat} value={cat}>
-                  {cat}
-                </option>
-              ))}
-            </select>
+          <div className="board-form-actions">
+            <button type="button" onClick={() => navigate(-1)} className="btn-secondary">
+              <X size={18} /> Cancel
+            </button>
+            <button type="submit" disabled={isSubmitting} className="btn-primary">
+              <Save size={18} /> {isSubmitting ? 'Saving...' : isEditing ? 'Save Changes' : 'Post'}
+            </button>
           </div>
-        </div>
-
-        <div>
-          <label
-            htmlFor="body"
-            style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 'bold' }}
-          >
-            Details
-          </label>
-          <textarea
-            id="body"
-            name="body"
-            required
-            value={formData.body}
-            onChange={handleChange}
-            placeholder="Write the details of your post here..."
-            style={{
-              width: '100%',
-              minHeight: '250px',
-              padding: '0.75rem',
-              borderRadius: '4px',
-              border: '1px solid #ccc',
-              resize: 'vertical',
-            }}
-          />
-        </div>
-
-        <div style={{ display: 'flex', gap: '1rem', justifyContent: 'flex-end' }}>
-          <button
-            type="button"
-            onClick={() => navigate(-1)}
-            style={{
-              display: 'flex',
-              alignItems: 'center',
-              gap: '0.5rem',
-              padding: '0.75rem 1.5rem',
-              background: '#f0f0f0',
-              border: 'none',
-              borderRadius: '4px',
-              cursor: 'pointer',
-            }}
-          >
-            <X size={18} /> Cancel
-          </button>
-          <button
-            type="submit"
-            disabled={isSubmitting}
-            style={{
-              display: 'flex',
-              alignItems: 'center',
-              gap: '0.5rem',
-              padding: '0.75rem 1.5rem',
-              background: '#0056b3',
-              color: 'white',
-              border: 'none',
-              borderRadius: '4px',
-              cursor: 'pointer',
-            }}
-          >
-            <Save size={18} /> {isSubmitting ? 'Saving...' : isEditing ? 'Save Changes' : 'Post'}
-          </button>
-        </div>
-      </form>
+        </form>
+      </div>
     </div>
   );
 }

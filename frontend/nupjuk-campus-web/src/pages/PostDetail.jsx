@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { useParams, useNavigate, useLocation } from 'react-router-dom';
+import { useParams, useNavigate } from 'react-router-dom';
 import { ArrowLeft, MessageSquare, Trash2, Edit2 } from 'lucide-react';
 import {
   getPostDetail,
@@ -9,18 +9,17 @@ import {
   deleteComment,
 } from '../api/board';
 import CommentCard from '../components/board/CommentCard';
+import '../styles/Board.css';
 
 export default function PostDetail() {
   const { courseId, postId } = useParams();
   const navigate = useNavigate();
-  const location = useLocation();
   const [post, setPost] = useState(null);
   const [newComment, setNewComment] = useState('');
   const [isLoading, setIsLoading] = useState(true);
 
   const userString = localStorage.getItem('currentUser');
   const user = userString ? JSON.parse(userString) : null;
-
   const currentUserId = user?.id;
 
   useEffect(() => {
@@ -30,7 +29,6 @@ export default function PostDetail() {
   const loadPost = async () => {
     try {
       setIsLoading(true);
-
       const data = await getPostDetail(courseId, postId);
       setPost(data);
     } catch (error) {
@@ -41,14 +39,11 @@ export default function PostDetail() {
   };
 
   const handleDeletePost = async () => {
-    const isConfirmed = window.confirm(
-      'Are you sure you want to delete this post? This action cannot be undone.'
-    );
-
-    if (isConfirmed) {
+    if (
+      window.confirm('Are you sure you want to delete this post? This action cannot be undone.')
+    ) {
       try {
         await deletePost(postId);
-
         navigate(`/courses/${courseId}`, { state: { activeTab: 'board' } });
       } catch (error) {
         console.error('Failed to delete post', error);
@@ -63,13 +58,17 @@ export default function PostDetail() {
 
     try {
       const addedComment = await createComment(courseId, postId, newComment);
+      let newCommentData = addedComment.comment || addedComment;
 
-      const newCommentData = addedComment.comment || addedComment;
+      if (!newCommentData.author && user) {
+        newCommentData.author = {
+          id: user.id,
+          displayName: user.displayName || user.name,
+          kaistEmail: user.kaistEmail,
+        };
+      }
 
-      setPost((prev) => ({
-        ...prev,
-        comments: [...(prev.comments || []), newCommentData],
-      }));
+      setPost((prev) => ({ ...prev, comments: [...(prev.comments || []), newCommentData] }));
       setNewComment('');
     } catch (error) {
       console.error('Failed to add comment', error);
@@ -79,7 +78,6 @@ export default function PostDetail() {
   const handleUpdateComment = async (commentId, updatedBody) => {
     try {
       await updateComment(commentId, updatedBody);
-
       setPost((prev) => ({
         ...prev,
         comments: prev.comments.map((c) => (c.id === commentId ? { ...c, body: updatedBody } : c)),
@@ -91,156 +89,80 @@ export default function PostDetail() {
   };
 
   const handleDeleteComment = async (commentId) => {
-    const isConfirmed = window.confirm('Are you sure you want to delete this comment?');
-    if (!isConfirmed) return;
-
+    if (!window.confirm('Are you sure you want to delete this comment?')) return;
     try {
       await deleteComment(commentId);
-
-      setPost((prev) => ({
-        ...prev,
-        comments: prev.comments.filter((c) => c.id !== commentId),
-      }));
+      setPost((prev) => ({ ...prev, comments: prev.comments.filter((c) => c.id !== commentId) }));
     } catch (error) {
       console.error('Failed to delete comment', error);
       alert('Failed to delete comment.');
     }
   };
 
-  if (isLoading) return <div>Loading post...</div>;
-  if (!post) return <div>Post not found.</div>;
+  if (isLoading) return <div className="post-container">Loading post...</div>;
+  if (!post) return <div className="post-container">Post not found.</div>;
 
   const isAuthor = post.author?.id === currentUserId;
+
   return (
-    <div
-      className="post-detail-container"
-      style={{ maxWidth: '800px', margin: '0 auto', padding: '2rem' }}
-    >
+    <div className="post-container">
       <button
         onClick={() => navigate(`/courses/${courseId}`, { state: { activeTab: 'board' } })}
-        style={{
-          display: 'flex',
-          alignItems: 'center',
-          gap: '0.5rem',
-          marginBottom: '2rem',
-          background: 'none',
-          border: 'none',
-          cursor: 'pointer',
-        }}
+        className="back-button"
+        style={{ marginBottom: '1.5rem' }}
       >
         <ArrowLeft size={20} /> Back to Course
       </button>
 
-      <article
-        className="post-content"
-        style={{ borderBottom: '1px solid #eee', paddingBottom: '2rem', marginBottom: '2rem' }}
-      >
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+      <article className="post-content-card">
+        <div className="post-meta-header">
           <div>
-            <span
-              style={{
-                background: '#f0f0f0',
-                padding: '0.25rem 0.75rem',
-                borderRadius: '1rem',
-                fontSize: '0.875rem',
-              }}
-            >
-              {post.category}
-            </span>
-            <span style={{ color: '#666' }}>
+            <span className="post-category-badge">{post.category}</span>
+            <span className="post-author">
               By {post.author?.displayName || post.author?.kaistEmail || 'Unknown'}
             </span>
           </div>
 
-          {/* Action Buttons for Edit and Delete */}
           {isAuthor && (
-            <div style={{ display: 'flex', gap: '0.5rem' }}>
+            <div style={{ display: 'flex', gap: '0.75rem' }}>
               <button
                 onClick={() => navigate(`/courses/${courseId}/posts/${postId}/edit`)}
-                style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '0.25rem',
-                  padding: '0.5rem',
-                  background: 'none',
-                  border: '1px solid #ccc',
-                  borderRadius: '4px',
-                  cursor: 'pointer',
-                  color: '#333',
-                }}
+                className="btn-secondary"
               >
                 <Edit2 size={16} /> Edit
               </button>
-              <button
-                onClick={handleDeletePost}
-                style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '0.25rem',
-                  padding: '0.5rem',
-                  background: '#fee',
-                  border: '1px solid #fcc',
-                  borderRadius: '4px',
-                  cursor: 'pointer',
-                  color: '#d32f2f',
-                }}
-              >
+              <button onClick={handleDeletePost} className="btn-danger">
                 <Trash2 size={16} /> Delete
               </button>
             </div>
           )}
         </div>
-        <h1 style={{ marginTop: '1rem' }}>{post.title}</h1>
-        <p style={{ whiteSpace: 'pre-wrap', lineHeight: '1.6', marginTop: '1.5rem' }}>
-          {post.body}
-        </p>
 
-        {/* Upvote button removed from here */}
+        <h1>{post.title}</h1>
+        <p className="post-body">{post.body}</p>
       </article>
 
       <section className="comments-section">
         <h3>
-          <MessageSquare
-            size={20}
-            style={{ display: 'inline', verticalAlign: 'text-bottom', marginRight: '0.5rem' }}
-          />
-          {post.comments?.length || 0} Comments
+          <MessageSquare size={20} /> {post.comments?.length || 0} Comments
         </h3>
 
-        <form onSubmit={handleCommentSubmit} style={{ marginTop: '1.5rem', marginBottom: '2rem' }}>
+        {/* Form wrapped in the new card class */}
+        <form onSubmit={handleCommentSubmit} className="comment-form-card">
           <textarea
             value={newComment}
             onChange={(e) => setNewComment(e.target.value)}
             placeholder="Write a comment..."
-            style={{
-              width: '100%',
-              minHeight: '100px',
-              padding: '1rem',
-              borderRadius: '4px',
-              border: '1px solid #ccc',
-              marginBottom: '0.5rem',
-              resize: 'vertical',
-            }}
+            className="board-input comment-textarea"
           />
-          <button
-            type="submit"
-            style={{
-              padding: '0.5rem 1.5rem',
-              cursor: 'pointer',
-              background: '#0056b3',
-              color: 'white',
-              border: 'none',
-              borderRadius: '4px',
-            }}
-          >
-            Post Comment
-          </button>
+          <div className="comment-form-actions">
+            <button type="submit" className="btn-primary" disabled={!newComment.trim()}>
+              Post Comment
+            </button>
+          </div>
         </form>
 
-        <div
-          className="comments-list"
-          style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}
-        >
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
           {post.comments?.map((comment) => (
             <CommentCard
               key={comment.id}

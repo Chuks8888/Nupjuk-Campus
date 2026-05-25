@@ -15,55 +15,25 @@ export default function CommentCard({ comment, currentUserId, onUpdate, onDelete
 
   const handleCancel = () => {
     setIsEditing(false);
-    setEditBody(comment.body); // Revert changes
+    setEditBody(comment.body);
   };
 
   return (
-    <div
-      className="comment"
-      style={{ background: '#f9f9f9', padding: '1rem', borderRadius: '8px' }}
-    >
-      <div
-        style={{
-          display: 'flex',
-          justifyContent: 'space-between',
-          marginBottom: '0.5rem',
-          fontSize: '0.875rem',
-          color: '#666',
-        }}
-      >
+    <div className="comment-card">
+      <div className="comment-header">
         <div>
-          <strong>{comment.author?.displayName || comment.author?.kaistEmail || 'Unknown'}</strong>
-          <span style={{ marginLeft: '0.5rem' }}>
-            {new Date(comment.createdAt).toLocaleDateString()}
+          <span className="comment-author">
+            {comment.author?.displayName || comment.author?.kaistEmail || 'Unknown'}
           </span>
+          <span className="comment-date">{new Date(comment.createdAt).toLocaleDateString()}</span>
         </div>
 
-        {/* Only show edit/delete icons if not currently editing and user is the author */}
         {isAuthor && !isEditing && (
-          <div style={{ display: 'flex', gap: '0.75rem' }}>
-            <button
-              onClick={() => setIsEditing(true)}
-              style={{
-                background: 'none',
-                border: 'none',
-                cursor: 'pointer',
-                color: '#333',
-                padding: 0,
-              }}
-            >
+          <div className="comment-actions">
+            <button onClick={() => setIsEditing(true)} className="icon-button">
               <Edit2 size={16} />
             </button>
-            <button
-              onClick={() => onDelete(comment.id)}
-              style={{
-                background: 'none',
-                border: 'none',
-                cursor: 'pointer',
-                color: '#d32f2f',
-                padding: 0,
-              }}
-            >
+            <button onClick={() => onDelete(comment.id)} className="icon-button comment-delete-btn">
               <Trash2 size={16} />
             </button>
           </div>
@@ -71,62 +41,23 @@ export default function CommentCard({ comment, currentUserId, onUpdate, onDelete
       </div>
 
       {isEditing ? (
-        <div style={{ marginTop: '0.5rem' }}>
+        <div className="comment-edit-container">
           <textarea
             value={editBody}
             onChange={(e) => setEditBody(e.target.value)}
-            style={{
-              width: '100%',
-              minHeight: '60px',
-              padding: '0.5rem',
-              borderRadius: '4px',
-              border: '1px solid #ccc',
-              resize: 'vertical',
-            }}
+            className="board-input comment-textarea"
           />
-          <div
-            style={{
-              display: 'flex',
-              gap: '0.5rem',
-              marginTop: '0.5rem',
-              justifyContent: 'flex-end',
-            }}
-          >
-            <button
-              onClick={handleCancel}
-              style={{
-                display: 'flex',
-                alignItems: 'center',
-                gap: '0.25rem',
-                padding: '0.25rem 0.75rem',
-                cursor: 'pointer',
-                background: '#e0e0e0',
-                border: 'none',
-                borderRadius: '4px',
-              }}
-            >
-              <X size={14} /> Cancel
+          <div className="comment-edit-actions">
+            <button onClick={handleCancel} className="btn-secondary">
+              <X size={16} /> Cancel
             </button>
-            <button
-              onClick={handleSave}
-              style={{
-                display: 'flex',
-                alignItems: 'center',
-                gap: '0.25rem',
-                padding: '0.25rem 0.75rem',
-                cursor: 'pointer',
-                background: '#0056b3',
-                color: 'white',
-                border: 'none',
-                borderRadius: '4px',
-              }}
-            >
-              <Save size={14} /> Save
+            <button onClick={handleSave} className="btn-primary">
+              <Save size={16} /> Save
             </button>
           </div>
         </div>
       ) : (
-        <p style={{ margin: '0', whiteSpace: 'pre-wrap' }}>{comment.body}</p>
+        <p className="comment-body">{comment.body}</p>
       )}
     </div>
   );

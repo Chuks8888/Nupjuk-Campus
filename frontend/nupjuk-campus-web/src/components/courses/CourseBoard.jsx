@@ -1,8 +1,9 @@
-// src/components/courses/CourseBoard.jsx
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { MessageSquare, Paperclip, Search, Plus } from 'lucide-react';
 import DetailCard from '../common/DetailCard';
+import '../../styles/Board.css';
+import '../../styles/Courses.css'; /* Inherit the search-container styles */
 
 const CATEGORIES = ['GENERAL', 'QUESTION', 'ASSIGNMENT', 'EXAM', 'PROJECT'];
 
@@ -17,44 +18,32 @@ export default function CourseBoard({ posts, courseId }) {
         post.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
         post.body.toLowerCase().includes(searchTerm.toLowerCase()) ||
         post.author_name.toLowerCase().includes(searchTerm.toLowerCase());
-
       const matchesCategory = selectedCategory === 'All' || post.category === selectedCategory;
-
       return matchesSearch && matchesCategory;
     }) || [];
 
   return (
     <div className="course-board-container">
-      <div
-        className="board-controls"
-        style={{ display: 'flex', gap: '1rem', marginBottom: '1.5rem' }}
-      >
-        <div
-          className="search-bar"
-          style={{
-            display: 'flex',
-            flex: 1,
-            alignItems: 'center',
-            border: '1px solid #ccc',
-            borderRadius: '4px',
-            padding: '0.5rem',
-          }}
-        >
-          <Search size={18} style={{ marginRight: '0.5rem' }} />
+      <div className="board-controls">
+        {/* MATCHES COURSES.JSX SEARCH BAR EXACTLY */}
+        <div className="search-container" style={{ flex: 1, margin: 0 }}>
+          <Search size={20} className="search-icon" />
           <input
             type="text"
             placeholder="Search posts..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            style={{ border: 'none', outline: 'none', width: '100%' }}
+            className="search-input"
           />
         </div>
 
         <select
           value={selectedCategory}
           onChange={(e) => setSelectedCategory(e.target.value)}
-          style={{ padding: '0.5rem', borderRadius: '4px', border: '1px solid #ccc' }}
+          className="board-input"
+          style={{ width: 'auto', minWidth: '150px' }}
         >
+          <option value="All">All Categories</option>
           {CATEGORIES.map((cat) => (
             <option key={cat} value={cat}>
               {cat}
@@ -62,16 +51,7 @@ export default function CourseBoard({ posts, courseId }) {
           ))}
         </select>
 
-        <button
-          onClick={() => navigate(`/courses/${courseId}/posts/new`)}
-          style={{
-            display: 'flex',
-            alignItems: 'center',
-            gap: '0.5rem',
-            padding: '0.5rem 1rem',
-            cursor: 'pointer',
-          }}
-        >
+        <button onClick={() => navigate(`/courses/${courseId}/posts/new`)} className="btn-primary">
           <Plus size={18} /> New Post
         </button>
       </div>
@@ -84,7 +64,7 @@ export default function CourseBoard({ posts, courseId }) {
             <div
               key={post.id}
               onClick={() => navigate(`/courses/${courseId}/posts/${post.id}`)}
-              style={{ cursor: 'pointer' }}
+              className="clickable-card"
             >
               <DetailCard
                 category={post.category}
