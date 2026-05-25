@@ -1,5 +1,7 @@
 import { useState, useEffect } from 'react';
 import { X, Save, Trash2 } from 'lucide-react';
+import DatePicker from 'react-datepicker';
+import 'react-datepicker/dist/react-datepicker.css';
 import { createPersonalEvent, updatePersonalEvent, deletePersonalEvent } from '../../api/calendar';
 
 export default function PersonalEventModal({
@@ -11,25 +13,18 @@ export default function PersonalEventModal({
 }) {
   const [formData, setFormData] = useState({
     title: '',
-    startTime: '',
-    endTime: '',
+    startTime: new Date(),
+    endTime: new Date(),
     description: '',
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
-
-  const toLocalDatetimeString = (dateObj) => {
-    if (!dateObj) return '';
-    const d = new Date(dateObj);
-    const pad = (n) => String(n).padStart(2, '0');
-    return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
-  };
 
   useEffect(() => {
     if (existingEvent) {
       setFormData({
         title: existingEvent.title,
-        startTime: toLocalDatetimeString(existingEvent.start),
-        endTime: toLocalDatetimeString(existingEvent.end),
+        startTime: new Date(existingEvent.start),
+        endTime: new Date(existingEvent.end || existingEvent.start),
         description: existingEvent.description || '',
       });
     } else if (selectedDate) {
@@ -41,8 +36,8 @@ export default function PersonalEventModal({
 
       setFormData({
         title: '',
-        startTime: toLocalDatetimeString(start),
-        endTime: toLocalDatetimeString(end),
+        startTime: start,
+        endTime: end,
         description: '',
       });
     }
@@ -50,24 +45,25 @@ export default function PersonalEventModal({
 
   if (!isOpen) return null;
 
-  const handleChange = (e) => {
-    const { name, value } = e.target;
+  const handleTextChange = (e) => {
+    setFormData((prev) => ({ ...prev, [e.target.name]: e.target.value }));
+  };
 
+  const handleStartTimeChange = (date) => {
     setFormData((prev) => {
-      const newData = { ...prev, [name]: value };
+      const newData = { ...prev, startTime: date };
 
-      if (name === 'startTime' && newData.endTime) {
-        const newStart = new Date(value);
-        const currentEnd = new Date(newData.endTime);
-
-        if (newStart >= currentEnd) {
-          newStart.setHours(newStart.getHours() + 1);
-          newData.endTime = toLocalDatetimeString(newStart);
-        }
+      if (newData.endTime && date >= newData.endTime) {
+        const newEnd = new Date(date);
+        newEnd.setHours(newEnd.getHours() + 1);
+        newData.endTime = newEnd;
       }
-
       return newData;
     });
+  };
+
+  const handleEndTimeChange = (date) => {
+    setFormData((prev) => ({ ...prev, endTime: date }));
   };
 
   const handleSubmit = async (e) => {
@@ -76,8 +72,8 @@ export default function PersonalEventModal({
 
     const payload = {
       ...formData,
-      startTime: new Date(formData.startTime).toISOString(),
-      endTime: new Date(formData.endTime).toISOString(),
+      startTime: formData.startTime.toISOString(),
+      endTime: formData.endTime.toISOString(),
     };
 
     try {
@@ -127,32 +123,38 @@ export default function PersonalEventModal({
               name="title"
               required
               value={formData.title}
-              onChange={handleChange}
+              onChange={handleTextChange}
               className="form-input"
+              autoComplete="off"
             />
           </div>
 
           <div className="form-row">
-            <div className="form-group">
+            <div className="form-group date-picker-wrapper">
               <label>Start Time</label>
-              <input
-                type="datetime-local"
-                name="startTime"
-                required
-                value={formData.startTime}
-                onChange={handleChange}
+              <DatePicker
+                selected={formData.startTime}
+                onChange={handleStartTimeChange}
+                showTimeSelect
+                timeFormat="h:mm aa"
+                timeIntervals={15}
+                dateFormat="MMMM d, yyyy h:mm aa"
                 className="form-input"
+                wrapperClassName="date-picker-full-width"
               />
             </div>
-            <div className="form-group">
+            <div className="form-group date-picker-wrapper">
               <label>End Time</label>
-              <input
-                type="datetime-local"
-                name="endTime"
-                required
-                value={formData.endTime}
-                onChange={handleChange}
+              <DatePicker
+                selected={formData.endTime}
+                onChange={handleEndTimeChange}
+                showTimeSelect
+                timeFormat="h:mm aa"
+                timeIntervals={15}
+                dateFormat="MMMM d, yyyy h:mm aa"
                 className="form-input"
+                wrapperClassName="date-picker-full-width"
+                minDate={formData.startTime}
               />
             </div>
           </div>
@@ -162,7 +164,7 @@ export default function PersonalEventModal({
             <textarea
               name="description"
               value={formData.description}
-              onChange={handleChange}
+              onChange={handleTextChange}
               className="form-input textarea-input"
             />
           </div>
