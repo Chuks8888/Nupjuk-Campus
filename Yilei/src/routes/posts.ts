@@ -1,9 +1,15 @@
 import { Router, Response } from 'express';
 import { prisma } from '../db';
 import { authenticateToken, AuthRequest } from '../middleware/auth';
+import { upload } from '../middleware/upload'; 
+import fs from 'fs';
+import path from 'path';
+import { transporter } from '../mail';
 
 // Initialize router with mergeParams to access :courseId from the parent router
 const router = Router({ mergeParams: true });
+
+const VALID_CATEGORIES = ['GENERAL', 'QUESTION', 'ASSIGNMENT', 'EXAM', 'PROJECT'];
 
 // Helper function to verify enrollment and get/create the board
 async function verifyAccessAndGetBoard(userId: number, courseId: number) {
@@ -12,8 +18,8 @@ async function verifyAccessAndGetBoard(userId: number, courseId: number) {
         where: { userId_courseId: { userId, courseId } }
     });
 
-    if (!enrollment) {
-        return { error: 'Access denied. You are not enrolled in this course.', status: 403 };
+    if (!enrollment || enrollment.status !== 'active') {
+        return { error: 'Access denied. You must be actively enrolled in this course.', status: 403 };
     }
 
     // Automatically find or create the board for this course
@@ -54,7 +60,8 @@ router.get('/', authenticateToken, async (req: AuthRequest, res: Response): Prom
         if (search) {
             whereClause.OR = [
                 { title: { contains: search, mode: 'insensitive' } },
-                { body: { contains: search, mode: 'insensitive' } }
+                { body: { contains: search, mode: 'insensitive' } },
+                { author: { displayName: { contains: search, mode: 'insensitive' } } }
             ];
         }
 
@@ -136,9 +143,10 @@ router.get('/:postId', authenticateToken, async (req: AuthRequest, res: Response
 
 // ==========================================
 // 3. POST /courses/:courseId/posts
-// Create a new post in the course board
+// Create a new post in the course board (with optional attachments)
+// Attachments are uploaded using multipart/form-data with the field name 'attachments' (up to 5 files)
 // ==========================================
-router.post('/', authenticateToken, async (req: AuthRequest, res: Response): Promise<any> => {
+router.post('/', authenticateToken, upload.array('attachments', 5), async (req: AuthRequest, res: Response): Promise<any> => {
     try {
         const userId = req.user!.userId;
         const courseId = parseInt(req.params.courseId as string);
@@ -152,26 +160,55 @@ router.post('/', authenticateToken, async (req: AuthRequest, res: Response): Pro
             return res.status(400).json({ error: 'Title and body are required.' });
         }
 
+        if (category && !VALID_CATEGORIES.includes(category)) {
+            return res.status(400).json({ 
+                error: `Invalid category. Must be one of: ${VALID_CATEGORIES.join(', ')}` 
+            });
+        }
+
         const access = await verifyAccessAndGetBoard(userId, courseId);
         if (access.error) return res.status(access.status).json({ error: access.error });
 
+        // 1. First, create the post in the database to get the postId
         const newPost = await prisma.post.create({
             data: {
                 boardId: access.board!.id,
                 authorId: userId,
                 title: title,
                 body: body,
-                category: category || null
+                category: category || 'GENERAL'
             }
         });
 
-        return res.status(201).json({ message: 'Post created successfully.', post: newPost });
+        // 2. If files are uploaded, write their metadata into the Attachment table, 
+        // linking them to the newly created post
+        const files = req.files as Express.Multer.File[];
+        if (files && files.length > 0) {
+            const attachmentData = files.map(file => ({
+                postId: newPost.id,               // Link to the newly created post
+                fileName: file.originalname,
+                fileUrl: `/uploads/${file.filename}`, // Map to the static directory defined in index.ts
+                fileSize: file.size,
+                fileExtension: path.extname(file.originalname).toLowerCase(),
+                storageBackend: 'server'
+            }));
+
+            // Batch write attachment records
+            await prisma.attachment.createMany({ data: attachmentData });
+        }
+
+        // 3. Return the complete post with attachment information to the frontend
+        const postWithAttachments = await prisma.post.findUnique({
+            where: { id: newPost.id },
+            include: { attachments: true }
+        });
+
+        return res.status(201).json({ message: 'Post created successfully.', post: postWithAttachments });
     } catch (error) {
         console.error('Error creating post:', error);
         return res.status(500).json({ error: 'Failed to create post.' });
     }
 });
-
 // ==========================================
 // 4. POST /courses/:courseId/posts/:postId/comments
 // Add a comment to a specific post
@@ -212,17 +249,72 @@ router.post('/:postId/comments', authenticateToken, async (req: AuthRequest, res
         });
 
         // If commenter is not the post author, send a notification to the author
+        // Check the author's notification preferences before sending
         if (postExists.authorId !== userId) {
-            await prisma.notification.create({
-                data: {
-                    userId: postExists.authorId, // Receiver is the post author
-                    type: 'NEW_COMMENT',
-                    content: `Someone commented on your post: ${postExists.title}`,
-                    targetType: 'POST',
-                    targetId: postId,
-                    targetUrl: `/courses/${courseId}/posts/${postId}` // Provide a URL to jump to the post
-                }
+            // 1. First, check if the post author has course-specific notification preferences for this course (courseId)
+            let pref = await prisma.notificationPreference.findFirst({
+                where: { userId: postExists.authorId, courseId: courseId }
             });
+
+            // 2. If no course-specific setting is found, check for the user's global setting (courseId: null)
+            if (!pref) {
+                pref = await prisma.notificationPreference.findFirst({
+                    where: { userId: postExists.authorId, courseId: null }
+                });
+            }
+
+            // 3. According to the schema, if no setting is found, the default should be true
+            const shouldNotify = pref ? pref.postCommentEnabled : true;
+
+            // If the author has enabled comment notifications, proceed with the notification logic
+            if (shouldNotify) {
+                // Store the notification in the database for the post author
+                const createdNotification = await prisma.notification.create({
+                    data: {
+                        userId: postExists.authorId,
+                        type: 'NEW_COMMENT',
+                        content: `Someone commented on your post: ${postExists.title}`,
+                        targetType: 'POST',
+                        targetId: postId,
+                        targetUrl: `/courses/${courseId}/posts/${postId}`
+                    }
+                });
+
+                // WebSocket real-time notification logic
+                // Get the global Socket.IO instance and emit a notification to the specific room for the post author
+                const io = req.app.get('io');
+                if (io) {
+                    io.to(`user_${postExists.authorId}`).emit('new_notification', createdNotification);
+                }
+
+                // Email notification logic: Check if the user has enabled email notifications for comments
+                const emailEnabled = pref ? pref.emailEnabled : false;
+                if (emailEnabled) {
+                    // Find the author's email and display name for sending the email notification
+                    const author = await prisma.user.findUnique({
+                        where: { id: postExists.authorId },
+                        select: { kaistEmail: true, displayName: true }
+                    });
+
+                    if (author && author.kaistEmail) {
+                        const subject = `[Nupjuk Campus] New Comment on your post: ${postExists.title}`;
+
+                        // Later, change the yourdomain.com to the actual domain
+                        const text = `Hello ${author.displayName || 'User'},\n\nSomeone just commented on your post "
+                        ${postExists.title}".\n\nYou can view the discussion here:\nhttps://yourdomain.com/courses/${courseId}/posts/${postId}\n\nBest,\nNupjuk Campus Team`;
+                        
+                        // Trigger the actual sending of the email
+                        await transporter.sendMail({
+                            from: process.env.EMAIL_USER,
+                            to: author.kaistEmail,
+                            subject: subject,
+                            text: text
+                        });
+                    
+                        console.log(`[Email] Sent to ${author.kaistEmail} about new comment.`);
+                    }
+                }
+            }
         }
 
         return res.status(201).json({ message: 'Comment added successfully.', comment: newComment });
@@ -249,7 +341,11 @@ router.delete('/:postId', authenticateToken, async (req: AuthRequest, res: Respo
         const access = await verifyAccessAndGetBoard(userId, courseId);
         if (access.error) return res.status(access.status).json({ error: access.error });
 
-        const post = await prisma.post.findUnique({ where: { id: postId } });
+        const post = await prisma.post.findUnique({ 
+            where: { id: postId },
+            include: { attachments: true } 
+        });
+
 
         if (!post || post.boardId !== access.board!.id) {
             return res.status(404).json({ error: 'Post not found.' });
@@ -258,6 +354,18 @@ router.delete('/:postId', authenticateToken, async (req: AuthRequest, res: Respo
         if (post.authorId !== userId) {
             return res.status(403).json({ error: 'Access denied. You can only delete your own posts.' });
         }
+
+        // Traverse and delete files on the disk
+        if (post.attachments && post.attachments.length > 0) {
+            post.attachments.forEach(file => {
+                const filePath = path.join(__dirname, '../../', file.fileUrl);
+                // Check if the file exists, if it does, delete it from the server
+                if (fs.existsSync(filePath)) {
+                    fs.unlinkSync(filePath);
+                }
+            });
+        }
+
 
         // Transaction to delete associated comments and the post itself
         await prisma.$transaction([
@@ -292,10 +400,16 @@ router.put('/:postId', authenticateToken, async (req: AuthRequest, res: Response
             return res.status(400).json({ error: 'Title and body are required for updating.' });
         }
 
+        // If a category is provided, validate it against the allowed categories
+        if (category && !VALID_CATEGORIES.includes(category)) {
+            return res.status(400).json({ 
+                error: `Invalid category. Must be one of: ${VALID_CATEGORIES.join(', ')}` 
+            });
+        }
+
         const access = await verifyAccessAndGetBoard(userId, courseId);
         if (access.error) return res.status(access.status).json({ error: access.error });
 
-        // Check if the post exists and belongs to this board, and also check if the user is the author
         const existingPost = await prisma.post.findUnique({ where: { id: postId } });
 
         if (!existingPost || existingPost.boardId !== access.board!.id) {
@@ -309,7 +423,12 @@ router.put('/:postId', authenticateToken, async (req: AuthRequest, res: Response
         // Update post
         const updatedPost = await prisma.post.update({
             where: { id: postId },
-            data: { title, body, category: category || null }
+            data: { 
+                title, 
+                body, 
+                // If category is not provided, keep the existing category instead of setting it to null
+                category: category || existingPost.category 
+            }
         });
 
         return res.status(200).json({ message: 'Post updated successfully.', post: updatedPost });

@@ -1,6 +1,7 @@
 import { Router, Response } from 'express';
 import { prisma } from '../db';
 import { authenticateToken, AuthRequest } from '../middleware/auth';
+import { transporter } from '../mail';
 
 const router = Router();
 
@@ -33,8 +34,8 @@ router.post('/', authenticateToken, async (req: AuthRequest, res: Response): Pro
             }
         });
 
-        if (!isEnrolled) {
-            return res.status(403).json({ error: 'Access denied. You must be enrolled in this course to host a meeting.' });
+        if (!isEnrolled || isEnrolled.status !== 'active') {
+            return res.status(403).json({ error: 'Access denied. You must be actively enrolled in this course to host a meeting.' });
         }
 
         // Database Action: Create the meeting and automatically add the creator as the first participant
@@ -93,7 +94,7 @@ router.get('/course/:courseId', authenticateToken, async (req: AuthRequest, res:
             }
         });
 
-        if (!isEnrolled) {
+        if (!isEnrolled || isEnrolled.status !== 'active') {
             return res.status(403).json({ error: 'Access denied. You are not enrolled in this course.' });
         }
 
@@ -156,7 +157,7 @@ router.post('/:id/availability', authenticateToken, async (req: AuthRequest, res
             }
         });
 
-        if (!isEnrolled) {
+        if (!isEnrolled || isEnrolled.status !== 'active') {
             return res.status(403).json({ error: 'Access denied. You cannot participate in this meeting.' });
         }
 
@@ -187,6 +188,18 @@ router.post('/:id/availability', authenticateToken, async (req: AuthRequest, res
             });
         });
 
+        // WebSocket Integration: After saving availability, emit an event to update the heatmap 
+        // in real-time for all clients viewing this meeting
+        const io = req.app.get('io');
+        if (io) {
+            // To all clients in the room for this meeting, broadcast a 'heatmapUpdated' event 
+            // to trigger real-time UI updates
+            io.to(`meeting_${meetingEventId}`).emit('heatmapUpdated', {
+                meetingId: meetingEventId,
+                message: 'New availability submitted'
+            });
+        }
+
         return res.status(200).json({ message: 'Your availability has been recorded successfully.' });
     } catch (error) {
         console.error('Error saving availability:', error);
@@ -197,6 +210,7 @@ router.post('/:id/availability', authenticateToken, async (req: AuthRequest, res
 // ==========================================
 // 4. GET /meetings/:id/heatmap
 // Aggregate all participants' JSON grids to calculate the schedule heatmap
+// Auto-suggest best times
 // ==========================================
 router.get('/:id/heatmap', authenticateToken, async (req: AuthRequest, res: Response): Promise<any> => {
     try {
@@ -222,7 +236,7 @@ router.get('/:id/heatmap', authenticateToken, async (req: AuthRequest, res: Resp
             }
         });
 
-        if (!isEnrolled) {
+        if (!isEnrolled || isEnrolled.status !== 'active') {
             return res.status(403).json({ error: 'Access denied to this meeting heatmap.' });
         }
 
@@ -237,14 +251,12 @@ router.get('/:id/heatmap', authenticateToken, async (req: AuthRequest, res: Resp
         });
 
         // Matrix Aggregation Logic
-        // Output Format: Record<string (date), Record<string (timeSlot), { count: number, users: {id: number, name: string}[] }>>
         const heatmap: Record<string, Record<string, { count: number; users: { id: number; name: string }[] }>> = {};
 
         for (const record of records) {
             const slots = record.availableSlots as Record<string, string[]>;
             if (!slots || typeof slots !== 'object') continue;
 
-            // Iterate dates
             for (const date of Object.keys(slots)) {
                 if (!Array.isArray(slots[date])) continue;
 
@@ -252,7 +264,6 @@ router.get('/:id/heatmap', authenticateToken, async (req: AuthRequest, res: Resp
                     heatmap[date] = {};
                 }
 
-                // Iterate specific half-hour blocks or time indicators inside that date
                 for (const timeSlot of slots[date]) {
                     if (!heatmap[date][timeSlot]) {
                         heatmap[date][timeSlot] = { count: 0, users: [] };
@@ -261,22 +272,46 @@ router.get('/:id/heatmap', authenticateToken, async (req: AuthRequest, res: Resp
                     heatmap[date][timeSlot].count += 1;
                     heatmap[date][timeSlot].users.push({
                         id: record.user.id,
-                        name: record.user.displayName
+                        name: record.user.displayName || 'Unknown User'
                     });
                 }
             }
         }
 
+        // 1. Flatten the nested heatmap into a one-dimensional array for easier sorting
+        const flattenedSlots: { date: string; time: string; count: number; users: { id: number; name: string }[] }[] = [];
+        
+        for (const date in heatmap) {
+            for (const time in heatmap[date]) {
+                flattenedSlots.push({
+                    date: date,
+                    time: time,
+                    count: heatmap[date]![time]!.count,
+                    users: heatmap[date]![time]!.users
+                });
+            }
+        }
+
+        // 2. Sort the flattened array in descending order based on the count of participants
+        flattenedSlots.sort((a, b) => b.count - a.count);
+
+        // 3. Filter out time slots with no participants and take the top 3 as best suggestions
+        const bestSuggestions = flattenedSlots
+            .filter(slot => slot.count > 0)
+            .slice(0, 3);
+
         return res.status(200).json({
             meetingId: meetingEventId,
             totalRespondents: records.length,
-            heatmap: heatmap
+            heatmap: heatmap,
+            suggestions: bestSuggestions // Return the top 3 best time slots with participant counts and user details
         });
     } catch (error) {
         console.error('Error generating heatmap:', error);
         return res.status(500).json({ error: 'Failed to compute schedule heatmap matrix.' });
     }
 });
+
 
 // ==========================================
 // 5. POST /meetings/:id/finalize
@@ -324,23 +359,103 @@ router.post('/:id/finalize', authenticateToken, async (req: AuthRequest, res: Re
             where: { meetingEventId: meetingEventId }
         });
 
-        // Batch create notification data (excluding the host themselves)
-        const notificationsData = participants
+        // Extract all participant IDs except the host
+        const targetUserIds = participants
             .filter(p => p.userId !== userId)
-            .map(p => ({
-                userId: p.userId,
-                type: 'MEETING_FINALIZED',
-                content: `Meeting '${meeting.title}' has been finalized!`,
-                targetType: 'MEETING',
-                targetId: meetingEventId,
-                targetUrl: `/courses/${meeting.courseId}/meetings/${meetingEventId}`
-            }));
+            .map(p => p.userId);
 
-        // Batch insert all notifications at once, which is more efficient than inserting one by one
-        if (notificationsData.length > 0) {
-            await prisma.notification.createMany({
-                data: notificationsData
-            });
+        if (targetUserIds.length > 0) {
+            // Batch query to get notification preferences for all target users, prioritizing course-specific settings
+            const [preferences, targetUsers] = await prisma.$transaction([
+                prisma.notificationPreference.findMany({
+                    where: {
+                        userId: { in: targetUserIds },
+                        OR: [
+                        { courseId: meeting.courseId }, 
+                        { courseId: null }
+                        ]
+                    }
+                }),
+                prisma.user.findMany({
+                    where: { id: { in: targetUserIds } },
+                    select: { id: true, kaistEmail: true, displayName: true }
+                })
+            ]);
+
+            // Helper function to determine if a user wants to receive meeting notifications
+            const wantsMeetingNotification = (targetUserId: number) => {
+                // 1. First, check for course-specific settings for this course
+                const coursePref = preferences.find(p => p.userId === targetUserId && p.courseId === meeting.courseId);
+                if (coursePref) return coursePref.meetingEnabled;
+
+                // 2. Next, check for global settings (courseId: null)
+                const globalPref = preferences.find(p => p.userId === targetUserId && p.courseId === null);
+                if (globalPref) return globalPref.meetingEnabled;
+
+                // 3. Default to true if no settings are found
+                return true;
+            };
+
+            // Create a queue to store email details for users who have enabled email notifications for meetings
+            const emailsToSend: { to: string; subject: string; text: string }[] = [];
+
+            // Generate the final array of notifications to be created (only for users who have enabled meeting notifications)
+            const notificationsData = targetUserIds
+                .filter(targetUserId => wantsMeetingNotification(targetUserId))
+                .map(targetUserId => {
+                    
+                    // Check course-specific preference first
+                    const targetPref = preferences.find(p => p.userId === targetUserId && (p.courseId === meeting.courseId || p.courseId === null));
+                    if (targetPref && targetPref.emailEnabled) {
+                        const user = targetUsers.find(u => u.id === targetUserId);
+                        if (user && user.kaistEmail) {
+                            emailsToSend.push({
+                                to: user.kaistEmail,
+                                subject: `[Nupjuk Campus] Meeting Finalized: ${meeting.title}`,
+                                text: `Hello ${user.displayName || 'User'},\n\nThe meeting "${meeting.title}" has been successfully finalized!\n\nCheck your schedule and view details here:\nhttps://yourdomain.com/courses/${meeting.courseId}/meetings/${meetingEventId}\n\nBest,\nNupjuk Campus Team`
+                            });
+                        }
+                    }
+
+                    return {
+                        userId: targetUserId,
+                        type: 'MEETING_FINALIZED',
+                        content: `Meeting '${meeting.title}' has been finalized!`,
+                        targetType: 'MEETING',
+                        targetId: meetingEventId,
+                        targetUrl: `/courses/${meeting.courseId}/meetings/${meetingEventId}`
+                    };
+                });
+
+
+            // Execute all side effects
+            if (notificationsData.length > 0) {
+                // Batch write notifications to the database
+                await prisma.notification.createMany({
+                    data: notificationsData
+                });
+
+                // Emit real-time notifications to all affected users via WebSocket
+                const io = req.app.get('io');
+                if (io) {
+                    for (const notification of notificationsData) {
+                        io.to(`user_${notification.userId}`).emit('new_notification', {
+                            message: "You have a new meeting notification!"
+                        });
+                    }
+                }
+
+                // Trigger the actual sending of emails in the queue
+                for (const email of emailsToSend) {
+                await transporter.sendMail({
+                    from: process.env.EMAIL_USER,
+                    to: email.to,
+                    subject: email.subject,
+                    text: email.text
+                });
+            }
+            }
+
         }
 
         return res.status(200).json({

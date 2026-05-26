@@ -77,6 +77,14 @@ router.post("/signup", async (req, res) => {
 
     const passwordHash = await bcrypt.hash(password, 10);
 
+    // Check if email or student ID already exists
+    const existingUser = await prisma.user.findFirst({
+        where: { OR: [{ kaistEmail }, { studentId }] }
+    });
+    if (existingUser) {
+        return res.status(400).json({ error: "Email or Student ID already exists." });
+    }
+
     const user = await prisma.user.create({
       data: {
         studentId,

@@ -124,7 +124,6 @@ router.get('/:id/assignments', authenticateToken, async (req: AuthRequest, res: 
 });
 
 
-
 // ==========================================
 // 4. POST /courses/:courseId/assignments/:assignmentId/status
 // Update a user's personal completion status for a specific assignment
@@ -180,7 +179,50 @@ router.post('/:courseId/assignments/:assignmentId/status', authenticateToken, as
     }
 });
 
+// ==========================================
+// 5. GET /courses/:id/board-preview
+// Allow any email-verified user (even if not enrolled) to view basic course board info (without posts)
+// ==========================================
+router.get('/:id/board-preview', authenticateToken, async (req: AuthRequest, res: Response): Promise<any> => {
+    try {
+        const courseId = parseInt(req.params.id as string);
 
+        if (isNaN(courseId)) {
+            return res.status(400).json({ error: 'Invalid course ID format.' });
+        }
+
+        // We do NOT check enrollment status here, but we also do NOT include any post data
+        // in the response, only basic board info. 
+        // This allows anyone with a verified email to see the course board structure.
+        const courseInfo = await prisma.course.findUnique({
+            where: { id: courseId },
+            select: {
+                courseCode: true,
+                courseName: true,
+                semester: true,
+                boards: {
+                    select: {
+                        id: true,
+                        introText: true,
+                        createdAt: true
+                    }
+                }
+            }
+        });
+
+        if (!courseInfo) {
+            return res.status(404).json({ error: 'Course not found.' });
+        }
+
+        return res.status(200).json({
+            message: "Board preview access granted.",
+            course: courseInfo
+        });
+    } catch (error) {
+        console.error('Error fetching board preview:', error);
+        return res.status(500).json({ error: 'Failed to fetch board preview.' });
+    }
+});
 
 
 export default router;
