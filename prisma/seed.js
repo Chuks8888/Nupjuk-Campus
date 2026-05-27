@@ -162,6 +162,11 @@ async function main() {
       kaistEmail: "sara.choi@kaist.ac.kr",
       displayName: "Sara Choi",
     },
+    {
+      studentId: "20266111",
+      kaistEmail: "htarczynski@kaist.ac.kr",
+      displayName: "Hugo Tarczynski",
+    },
   ];
 
   for (const user of userSeeds) {
@@ -182,31 +187,31 @@ async function main() {
   const courses = {};
   const courseSeeds = [
     {
-      courseCode: "CS350",
+      courseCode: "CS.30500",
       courseName: "Introduction to Software Engineering",
       semester: "2026 Spring",
       klmsCourseId: "klms-cs350-2026s",
     },
     {
-      courseCode: "CS374",
+      courseCode: "CS.30704",
       courseName: "Introduction to Human-Computer Interaction",
       semester: "2026 Spring",
       klmsCourseId: "klms-cs374-2026s",
     },
     {
-      courseCode: "CS330",
+      courseCode: "CS.30300",
       courseName: "Operating Systems and Lab",
       semester: "2026 Spring",
       klmsCourseId: "klms-cs330-2026s",
     },
     {
-      courseCode: "MAS275",
+      courseCode: "MAS.20705",
       courseName: "Discrete Mathematics",
       semester: "2026 Spring",
       klmsCourseId: "klms-mas275-2026s",
     },
     {
-      courseCode: "HSS101",
+      courseCode: "HSS.10001",
       courseName: "Academic Writing",
       semester: "2026 Spring",
       klmsCourseId: "klms-hss101-2026s",
@@ -271,20 +276,86 @@ async function main() {
   }
 
   const assignmentSeeds = [
-    ["CS350", "Milestone 3: Architecture and API Contract", "2026-05-24T23:59:00+09:00", "Finalize module boundaries, endpoint contracts, and risk notes.", "cs350-m3"],
-    ["CS350", "Sprint Review Demo", "2026-05-31T18:00:00+09:00", "Prepare a five minute demo with at least one end-to-end user flow.", "cs350-demo"],
-    ["CS374", "Contextual Inquiry Report", "2026-05-23T23:59:00+09:00", "Summarize interview findings and design implications.", "cs374-ci"],
-    ["CS374", "Interactive Prototype Critique", "2026-06-02T23:59:00+09:00", "Submit annotated screenshots and usability issues.", "cs374-prototype"],
-    ["CS330", "Thread Scheduler Lab", "2026-05-27T23:59:00+09:00", "Implement priority scheduling and explain starvation handling.", "cs330-scheduler"],
-    ["CS330", "Filesystem Reading Quiz", "2026-06-04T11:59:00+09:00", "Short quiz covering inode layout and buffer cache behavior.", "cs330-fs-quiz"],
-    ["MAS275", "Problem Set 9: Graph Connectivity", "2026-05-26T23:59:00+09:00", "Exercises on trees, cuts, and bipartite graphs.", "mas275-ps9"],
-    ["MAS275", "Midterm Corrections", "2026-05-30T23:59:00+09:00", "Write corrected solutions for missed problems.", "mas275-corrections"],
-    ["HSS101", "Research Essay Draft", "2026-05-28T23:59:00+09:00", "Upload a 1200-word draft with at least four sources.", "hss101-draft"],
-    ["HSS101", "Peer Review Notes", "2026-06-03T17:00:00+09:00", "Leave review comments for two classmates.", "hss101-peer-review"],
+    [
+      "CS350",
+      "Milestone 3: Architecture and API Contract",
+      "2026-05-24T23:59:00+09:00",
+      "Finalize module boundaries, endpoint contracts, and risk notes.",
+      "cs350-m3",
+    ],
+    [
+      "CS350",
+      "Sprint Review Demo",
+      "2026-05-31T18:00:00+09:00",
+      "Prepare a five minute demo with at least one end-to-end user flow.",
+      "cs350-demo",
+    ],
+    [
+      "CS374",
+      "Contextual Inquiry Report",
+      "2026-05-23T23:59:00+09:00",
+      "Summarize interview findings and design implications.",
+      "cs374-ci",
+    ],
+    [
+      "CS374",
+      "Interactive Prototype Critique",
+      "2026-06-02T23:59:00+09:00",
+      "Submit annotated screenshots and usability issues.",
+      "cs374-prototype",
+    ],
+    [
+      "CS330",
+      "Thread Scheduler Lab",
+      "2026-05-27T23:59:00+09:00",
+      "Implement priority scheduling and explain starvation handling.",
+      "cs330-scheduler",
+    ],
+    [
+      "CS330",
+      "Filesystem Reading Quiz",
+      "2026-06-04T11:59:00+09:00",
+      "Short quiz covering inode layout and buffer cache behavior.",
+      "cs330-fs-quiz",
+    ],
+    [
+      "MAS275",
+      "Problem Set 9: Graph Connectivity",
+      "2026-05-26T23:59:00+09:00",
+      "Exercises on trees, cuts, and bipartite graphs.",
+      "mas275-ps9",
+    ],
+    [
+      "MAS275",
+      "Midterm Corrections",
+      "2026-05-30T23:59:00+09:00",
+      "Write corrected solutions for missed problems.",
+      "mas275-corrections",
+    ],
+    [
+      "HSS101",
+      "Research Essay Draft",
+      "2026-05-28T23:59:00+09:00",
+      "Upload a 1200-word draft with at least four sources.",
+      "hss101-draft",
+    ],
+    [
+      "HSS101",
+      "Peer Review Notes",
+      "2026-06-03T17:00:00+09:00",
+      "Leave review comments for two classmates.",
+      "hss101-peer-review",
+    ],
   ];
 
   const assignments = {};
-  for (const [courseCode, title, dueDate, description, klmsAssignmentId] of assignmentSeeds) {
+  for (const [
+    courseCode,
+    title,
+    dueDate,
+    description,
+    klmsAssignmentId,
+  ] of assignmentSeeds) {
     const assignmentUrl = `https://klms.kaist.ac.kr/mod/assign/view.php?id=${klmsAssignmentId}`;
     assignments[klmsAssignmentId] = await prisma.assignment.upsert({
       where: { assignmentUrl },
@@ -322,7 +393,11 @@ async function main() {
     ["hss101-peer-review", "not_submitted", "todo"],
   ];
 
-  for (const [assignmentKey, klmsSubmissionStatus, userCompletionStatus] of demoStatuses) {
+  for (const [
+    assignmentKey,
+    klmsSubmissionStatus,
+    userCompletionStatus,
+  ] of demoStatuses) {
     await prisma.userAssignmentStatus.upsert({
       where: {
         userId_assignmentId: {
@@ -333,50 +408,146 @@ async function main() {
       update: {
         klmsSubmissionStatus,
         userCompletionStatus,
-        completedAt: userCompletionStatus === "done" ? date("2026-05-20T14:10:00+09:00") : null,
+        completedAt:
+          userCompletionStatus === "done"
+            ? date("2026-05-20T14:10:00+09:00")
+            : null,
       },
       create: {
         userId: demo.id,
         assignmentId: assignments[assignmentKey].id,
         klmsSubmissionStatus,
         userCompletionStatus,
-        completedAt: userCompletionStatus === "done" ? date("2026-05-20T14:10:00+09:00") : null,
+        completedAt:
+          userCompletionStatus === "done"
+            ? date("2026-05-20T14:10:00+09:00")
+            : null,
       },
     });
   }
 
   const postSeeds = [
-    ["CS350", "student@kaist.ac.kr", "How are people structuring the API contract?", "Our team is splitting endpoints by auth, ingest, calendar, and boards. Curious if anyone found a cleaner way to document request shapes.", "QUESTION"],
-    ["CS350", "minji.kim@kaist.ac.kr", "Sprint review checklist", "We made a small checklist for demo readiness: seed data, login flow, one failing-state screenshot, and known limitations.", "GENERAL"],
-    ["CS374", "sara.choi@kaist.ac.kr", "Prototype test participants", "If anyone still needs a pilot participant, I can trade one session tomorrow afternoon.", "GENERAL"],
-    ["CS374", "student@kaist.ac.kr", "Figma handoff question", "Do we need to include every hover state in the critique, or only the main error states?", "QUESTION"],
-    ["CS330", "jisoo.park@kaist.ac.kr", "Scheduler lab debugging tip", "Printing the ready queue after every context switch helped us catch a priority inversion bug quickly.", "GENERAL"],
-    ["CS330", "hyunwoo.lee@kaist.ac.kr", "Quiz scope for file systems", "Professor mentioned buffer cache replacement and inode direct/indirect blocks are fair game.", "EXAM"],
-    ["MAS275", "student@kaist.ac.kr", "Graph connectivity problem 4", "For the second direction, I think using the contrapositive makes the proof much shorter.", "QUESTION"],
-    ["MAS275", "minji.kim@kaist.ac.kr", "Study group before PS9", "A few of us are meeting at the library on Saturday at 2pm.", "GENERAL"],
-    ["HSS101", "sara.choi@kaist.ac.kr", "Peer review exchange", "I can review one extra draft tonight if someone can look at mine tomorrow.", "GENERAL"],
-    ["HSS101", "hyunwoo.lee@kaist.ac.kr", "Citation style reminder", "The instructor said APA is preferred, but consistency matters more than the exact style.", "GENERAL"],
+    [
+      "CS350",
+      "student@kaist.ac.kr",
+      "How are people structuring the API contract?",
+      "Our team is splitting endpoints by auth, ingest, calendar, and boards. Curious if anyone found a cleaner way to document request shapes.",
+      "QUESTION",
+    ],
+    [
+      "CS350",
+      "minji.kim@kaist.ac.kr",
+      "Sprint review checklist",
+      "We made a small checklist for demo readiness: seed data, login flow, one failing-state screenshot, and known limitations.",
+      "GENERAL",
+    ],
+    [
+      "CS374",
+      "sara.choi@kaist.ac.kr",
+      "Prototype test participants",
+      "If anyone still needs a pilot participant, I can trade one session tomorrow afternoon.",
+      "GENERAL",
+    ],
+    [
+      "CS374",
+      "student@kaist.ac.kr",
+      "Figma handoff question",
+      "Do we need to include every hover state in the critique, or only the main error states?",
+      "QUESTION",
+    ],
+    [
+      "CS330",
+      "jisoo.park@kaist.ac.kr",
+      "Scheduler lab debugging tip",
+      "Printing the ready queue after every context switch helped us catch a priority inversion bug quickly.",
+      "GENERAL",
+    ],
+    [
+      "CS330",
+      "hyunwoo.lee@kaist.ac.kr",
+      "Quiz scope for file systems",
+      "Professor mentioned buffer cache replacement and inode direct/indirect blocks are fair game.",
+      "EXAM",
+    ],
+    [
+      "MAS275",
+      "student@kaist.ac.kr",
+      "Graph connectivity problem 4",
+      "For the second direction, I think using the contrapositive makes the proof much shorter.",
+      "QUESTION",
+    ],
+    [
+      "MAS275",
+      "minji.kim@kaist.ac.kr",
+      "Study group before PS9",
+      "A few of us are meeting at the library on Saturday at 2pm.",
+      "GENERAL",
+    ],
+    [
+      "HSS101",
+      "sara.choi@kaist.ac.kr",
+      "Peer review exchange",
+      "I can review one extra draft tonight if someone can look at mine tomorrow.",
+      "GENERAL",
+    ],
+    [
+      "HSS101",
+      "hyunwoo.lee@kaist.ac.kr",
+      "Citation style reminder",
+      "The instructor said APA is preferred, but consistency matters more than the exact style.",
+      "GENERAL",
+    ],
   ];
 
   const posts = [];
   for (const [courseCode, email, title, body, category] of postSeeds) {
-    posts.push(await upsertPost({
-      boardId: boards[courseCode].id,
-      authorId: users[email].id,
-      title,
-      body,
-      category,
-    }));
+    posts.push(
+      await upsertPost({
+        boardId: boards[courseCode].id,
+        authorId: users[email].id,
+        title,
+        body,
+        category,
+      }),
+    );
   }
 
   const commentSeeds = [
-    [0, "minji.kim@kaist.ac.kr", "We used a one-page table with method, path, auth, request, and response columns."],
-    [0, "jisoo.park@kaist.ac.kr", "Adding sample error responses helped us find mismatches early."],
-    [1, "student@kaist.ac.kr", "This is useful. The seed data point is easy to forget."],
-    [2, "student@kaist.ac.kr", "I can do a pilot around 4pm if that still helps."],
-    [3, "sara.choi@kaist.ac.kr", "Our TA said main error states are enough if the flow is clear."],
-    [4, "student@kaist.ac.kr", "Nice tip. We had a similar issue when the idle thread stayed in the queue."],
-    [5, "jisoo.park@kaist.ac.kr", "Thanks, I was wondering whether indirect blocks were included."],
+    [
+      0,
+      "minji.kim@kaist.ac.kr",
+      "We used a one-page table with method, path, auth, request, and response columns.",
+    ],
+    [
+      0,
+      "jisoo.park@kaist.ac.kr",
+      "Adding sample error responses helped us find mismatches early.",
+    ],
+    [
+      1,
+      "student@kaist.ac.kr",
+      "This is useful. The seed data point is easy to forget.",
+    ],
+    [
+      2,
+      "student@kaist.ac.kr",
+      "I can do a pilot around 4pm if that still helps.",
+    ],
+    [
+      3,
+      "sara.choi@kaist.ac.kr",
+      "Our TA said main error states are enough if the flow is clear.",
+    ],
+    [
+      4,
+      "student@kaist.ac.kr",
+      "Nice tip. We had a similar issue when the idle thread stayed in the queue.",
+    ],
+    [
+      5,
+      "jisoo.park@kaist.ac.kr",
+      "Thanks, I was wondering whether indirect blocks were included.",
+    ],
     [6, "minji.kim@kaist.ac.kr", "Contrapositive worked for me too."],
     [7, "sara.choi@kaist.ac.kr", "I might join after my HCI meeting."],
     [8, "student@kaist.ac.kr", "I can swap reviews tomorrow morning."],
@@ -391,13 +562,43 @@ async function main() {
   }
 
   const personalEvents = [
-    ["Morning lecture block", "2026-05-22T09:00:00+09:00", "2026-05-22T12:00:00+09:00", "CS350 and CS374 back to back", "todo"],
-    ["Team 10 implementation sync", "2026-05-22T19:00:00+09:00", "2026-05-22T20:30:00+09:00", "Check Docker, auth, and KLMS ingestion status", "todo"],
-    ["Library study session", "2026-05-24T14:00:00+09:00", "2026-05-24T17:00:00+09:00", "MAS275 graph connectivity problems", "todo"],
-    ["Submit HSS101 draft", "2026-05-28T21:00:00+09:00", "2026-05-28T22:00:00+09:00", "Final proofreading before upload", "todo"],
+    [
+      "Morning lecture block",
+      "2026-05-22T09:00:00+09:00",
+      "2026-05-22T12:00:00+09:00",
+      "CS350 and CS374 back to back",
+      "todo",
+    ],
+    [
+      "Team 10 implementation sync",
+      "2026-05-22T19:00:00+09:00",
+      "2026-05-22T20:30:00+09:00",
+      "Check Docker, auth, and KLMS ingestion status",
+      "todo",
+    ],
+    [
+      "Library study session",
+      "2026-05-24T14:00:00+09:00",
+      "2026-05-24T17:00:00+09:00",
+      "MAS275 graph connectivity problems",
+      "todo",
+    ],
+    [
+      "Submit HSS101 draft",
+      "2026-05-28T21:00:00+09:00",
+      "2026-05-28T22:00:00+09:00",
+      "Final proofreading before upload",
+      "todo",
+    ],
   ];
 
-  for (const [title, startTime, endTime, description, status] of personalEvents) {
+  for (const [
+    title,
+    startTime,
+    endTime,
+    description,
+    status,
+  ] of personalEvents) {
     await upsertPersonalEvent({
       userId: demo.id,
       title,
@@ -412,7 +613,8 @@ async function main() {
     courseId: courses.CS350.id,
     creatorId: demo.id,
     title: "Team 10 Sprint Planning",
-    description: "Pick the final demo path and divide backend/frontend cleanup.",
+    description:
+      "Pick the final demo path and divide backend/frontend cleanup.",
     dateRangeStart: date("2026-05-23T00:00:00+09:00"),
     dateRangeEnd: date("2026-05-25T23:59:59+09:00"),
     timeRangeStart: "18:00",
@@ -422,7 +624,11 @@ async function main() {
     status: "open",
   });
 
-  for (const email of ["student@kaist.ac.kr", "minji.kim@kaist.ac.kr", "jisoo.park@kaist.ac.kr"]) {
+  for (const email of [
+    "student@kaist.ac.kr",
+    "minji.kim@kaist.ac.kr",
+    "jisoo.park@kaist.ac.kr",
+  ]) {
     await prisma.meetingParticipant.upsert({
       where: {
         meetingEventId_userId: {

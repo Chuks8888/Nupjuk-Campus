@@ -28,8 +28,8 @@ model User {
 
 model Course {
   id           Int      @id @default(autoincrement())
-  courseCode   String
-  courseName   String
+  courseCode   String   @unique
+  courseName   String   @unique
   semester     String
   klmsCourseId String   @unique
   createdAt    DateTime @default(now())
