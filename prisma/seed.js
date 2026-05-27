@@ -187,31 +187,31 @@ async function main() {
   const courses = {};
   const courseSeeds = [
     {
-      courseCode: "CS.30500",
-      courseName: "Introduction to Software Engineering",
+      courseCode: "CS350",
+      courseName: "Introduction to Engineering",
       semester: "2026 Spring",
       klmsCourseId: "klms-cs350-2026s",
     },
     {
-      courseCode: "CS.30704",
+      courseCode: "CS374",
       courseName: "Introduction to Human-Computer Interaction",
       semester: "2026 Spring",
       klmsCourseId: "klms-cs374-2026s",
     },
     {
-      courseCode: "CS.30300",
+      courseCode: "CS330",
       courseName: "Operating Systems and Lab",
       semester: "2026 Spring",
       klmsCourseId: "klms-cs330-2026s",
     },
     {
-      courseCode: "MAS.20705",
+      courseCode: "MAS275",
       courseName: "Discrete Mathematics",
       semester: "2026 Spring",
       klmsCourseId: "klms-mas275-2026s",
     },
     {
-      courseCode: "HSS.10001",
+      courseCode: "HSS101",
       courseName: "Academic Writing",
       semester: "2026 Spring",
       klmsCourseId: "klms-hss101-2026s",
