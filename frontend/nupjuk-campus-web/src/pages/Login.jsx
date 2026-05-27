@@ -1,10 +1,11 @@
 import { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { LogIn } from 'lucide-react';
+import { isValidKaistEmail } from '../utils/validator';
+import { login, storeSession } from '../api/auth';
 import AuthForm from '../components/auth/AuthForm';
 import InputField from '../components/auth/InputField';
 import SubmitButton from '../components/auth/SubmitButton';
-import { login, storeSession } from '../api/auth';
 import '../styles/Login.css';
 
 export default function Login() {
@@ -17,8 +18,8 @@ export default function Login() {
   const handleLogin = async (e) => {
     e.preventDefault();
     setError('');
-    
-    if (!email.endsWith('@kaist.ac.kr')) {
+
+    if (!isValidKaistEmail(email)) {
       setError('Please use a valid @kaist.ac.kr email address.');
       return;
     }
@@ -36,36 +37,41 @@ export default function Login() {
   };
 
   const footer = (
-    <p style={{ fontSize: '0.9rem' }}>
-      New to Nupjuk Campus? <Link to="/register" style={{ color: '#007AFF', textDecoration: 'none' }}>Register here</Link>
+    <p className="auth-footer">
+      New to Nupjuk Campus?{' '}
+      <Link to="/register" className="auth-link">
+        Register here
+      </Link>
     </p>
   );
 
   return (
     <div className="auth-page">
-      <div className="login-container">
-      <AuthForm 
-        title="Course Community & Schedule Management" 
-        onSubmit={handleLogin} 
+      <AuthForm
+        title="Course Community & Schedule Management"
+        onSubmit={handleLogin}
         error={error}
         footer={footer}
       >
-        <InputField 
-          label="KAIST Email" 
-          type="email" 
-          value={email} 
-          onChange={(e) => setEmail(e.target.value)} 
-          placeholder="student@kaist.ac.kr" 
+        <InputField
+          label="KAIST Email"
+          type="email"
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
+          placeholder="student@kaist.ac.kr"
         />
-        <InputField 
-          label="Password" 
-          type="password" 
-          value={password} 
-          onChange={(e) => setPassword(e.target.value)} 
+        <InputField
+          label="Password"
+          type="password"
+          value={password}
+          onChange={(e) => setPassword(e.target.value)}
         />
-        <SubmitButton text={isSubmitting ? 'LOGGING IN...' : 'LOGIN'} icon={LogIn} disabled={isSubmitting} />
+        <SubmitButton
+          text={isSubmitting ? 'LOGGING IN...' : 'LOGIN'}
+          icon={LogIn}
+          disabled={isSubmitting}
+        />
       </AuthForm>
-      </div>
     </div>
   );
 }

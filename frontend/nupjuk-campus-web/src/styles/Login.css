@@ -1,20 +1,15 @@
 /* Full-page centering */
 .auth-page {
   min-height: 100vh;
-
   display: flex;
   justify-content: center;
   align-items: center;
-
   padding: 2rem;
   box-sizing: border-box;
 
-  /* background-color: var(--bg-color); */
   background: linear-gradient(#0171df, #4898e6);
-  min-height: 100vh;
 
-  box-shadow:
-    0 10px 40px rgba(0,0,0,0.15);
+  box-shadow: var(--shadow-sm);
 }
 
 /* Form wrapper */
@@ -24,20 +19,16 @@
 
   /* fixed minimum height prevents jumping */
   min-height: 520px;
-
   padding: 2.5rem;
 
-  background: rgba(255,255,255,0.88);
+  background-color: var(--bg-surface);
   backdrop-filter: blur(10px);
-
   border-radius: 20px;
 
-  box-shadow:
-    0 10px 40px rgba(0,0,0,0.3);
+  box-shadow: var(--shadow-sm);
 
-  color: var(--text-primary);
-  font-family: sans-serif;
-
+  color: var(--text-strong);
+  font-family: var(--sans);
   box-sizing: border-box;
 }
 
@@ -59,22 +50,23 @@
   display: block;
   margin-bottom: 0.5rem;
   font-weight: 500;
+  color: var(--text-body);
 }
 
 /* Inputs */
 .form-input {
   width: 100%;
   height: 48px;
-
   padding: 0 1rem;
 
-  border: 1px solid var(--border-color);
+  border: 1px solid var(--border-main);
   border-radius: 10px;
 
-  background-color: rgba(255,255,255,0.85);
+  background-color: var(--bg-base);
+  color: var(--text-body);
 
   font-size: 1rem;
-
+  font-family: var(--sans);
   box-sizing: border-box;
 
   transition:
@@ -85,32 +77,91 @@
 .form-input:focus {
   outline: none;
 
-  border-color: #007AFF;
+  border-color: var(--brand-blue);
 
-  box-shadow:
-    0 0 0 4px rgba(0,122,255,0.15);
+  box-shadow: 0 0 0 4px var(--nav-active-bg);
 }
 
 /* Button */
 .login-button {
   margin-top: 1rem;
-
   height: 48px;
-
   border: none;
   border-radius: 10px;
 
-  background: #007AFF;
+  background: var(--brand-blue);
   color: white;
 
+  font-family: var(--sans);
   font-size: 1rem;
   font-weight: 600;
-
   cursor: pointer;
 
-  transition: background-color 0.2s ease;
+  transition: opacity 0.2s ease;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+}
+
+.login-button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  background-color: var(--text-muted);
 }
 
 .login-button:hover {
-  background: #005bb5;
+  opacity: 0.9;
+}
+
+.error-message {
+  color: var(--danger-text, #ef4444);
+  font-size: 0.875rem;
+  margin-top: 0.5rem;
+  text-align: center;
+}
+
+/* Auth Footer & Links */
+.auth-footer {
+  font-size: 0.9rem;
+  color: var(--text-body);
+}
+
+.auth-footer-container {
+  margin-top: 1rem;
+  text-align: center;
+}
+
+.auth-link {
+  color: var(--brand-blue);
+  text-decoration: none;
+  font-weight: 500;
+  transition: opacity 0.2s;
+}
+
+.auth-link:hover {
+  opacity: 0.8;
+}
+
+/* Status Messages */
+.status-message {
+  color: var(--success-text, #34c759); /* Define --success-text in index.css later */
+  font-size: 0.875rem;
+  margin: 0;
+}
+
+/* Success UI wrapper */
+.success-container {
+  text-align: center;
+  padding: 2rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1rem;
+}
+
+.success-container p {
+  line-height: 1.5;
+  color: var(--text-body);
 }

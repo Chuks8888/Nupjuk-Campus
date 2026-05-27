@@ -13,7 +13,10 @@ export function getAuthToken() {
   return localStorage.getItem('authToken');
 }
 
-export async function apiRequest(path, { method = 'GET', body, token = getAuthToken(), headers = {} } = {}) {
+export async function apiRequest(
+  path,
+  { method = 'GET', body, token = getAuthToken(), headers = {} } = {}
+) {
   const response = await fetch(`${API_BASE_URL}${path}`, {
     method,
     headers: {
@@ -30,9 +33,19 @@ export async function apiRequest(path, { method = 'GET', body, token = getAuthTo
     : await response.text();
 
   if (!response.ok) {
-    const message = typeof payload === 'object' && payload?.error
-      ? payload.error
-      : response.statusText;
+    if (response.status === 401) {
+      console.warn('Session expired or unauthorized. Logging out...');
+
+      // Clear the session data manually to avoid circular imports
+      localStorage.removeItem('authToken');
+      localStorage.removeItem('currentUser');
+
+      // Force the browser to the login page
+      window.location.href = '/login';
+    }
+
+    const message =
+      typeof payload === 'object' && payload?.error ? payload.error : response.statusText;
     throw new ApiError(message, response.status, payload);
   }
 

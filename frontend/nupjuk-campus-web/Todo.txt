@@ -1,0 +1,17 @@
+Course Post Board
+Attachements and upvotes
+
+Calendar View Page
+Develop a multi-view interactive calendar to visually unify academic deadlines, scheduled meetings, and custom personal events.
+
+    Build toggle controls to switch the calendar between monthly, weekly, and daily views.
+
+    Apply course-specific color-coding to all synced events and assignments.
+
+    Enable a click-to-add interaction directly on the calendar grid for creating personal schedules (e.g., exams, project milestones).
+
+    Create a dedicated form interface (sub-page or modal) for editing custom personal events.
+
+    Apply distinct visual indicators to clearly differentiate assignments, meetings, and personal events.
+
+    Implement a secondary list view below the main calendar to detail all events for the currently selected day.

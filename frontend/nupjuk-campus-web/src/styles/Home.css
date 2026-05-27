@@ -1,21 +1,19 @@
 .home-container {
   padding: 1.5rem;
-  padding-bottom: 80px;
-  font-family: sans-serif;
-  background-color: var(--container-bg);
-  color: var(--text-primary);
-  min-height: 90vh;
+  font-family: var(--sans);
+  background-color: transparent;
+  color: var(--text-body);
 }
 
 .home-header {
   text-align: left;
   margin-bottom: 2rem;
-  border-bottom: 1px solid var(--border-color);
+  border-bottom: 1px solid var(--border-main);
   padding-bottom: 1rem;
 }
 
 .home-header h1 {
   margin: 0;
   font-size: 1.5rem;
+  color: var(--text-strong);
 }
-
