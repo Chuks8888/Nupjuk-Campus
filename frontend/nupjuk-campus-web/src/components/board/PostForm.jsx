@@ -1,17 +1,33 @@
-import { useState, useEffect } from 'react';
+import { useRef, useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { ArrowLeft, Save, X } from 'lucide-react';
+import { ArrowLeft, Download, File, Paperclip, Save, Trash2, Upload, X } from 'lucide-react';
 import { createPost, updatePost, getPostDetail } from '../../api/board';
+import { deleteAttachment, getPostAttachments, uploadPostAttachment } from '../../api/attachments';
 import '../../styles/Board.css';
 
 const ALLOWED_CATEGORIES = ['GENERAL', 'QUESTION', 'ASSIGNMENT', 'EXAM', 'PROJECT'];
+
+function formatFileSize(bytes) {
+  const size = Number(bytes);
+  if (!size) return '';
+
+  const units = ['B', 'KB', 'MB', 'GB'];
+  const unitIndex = Math.min(Math.floor(Math.log(size) / Math.log(1024)), units.length - 1);
+  const value = size / 1024 ** unitIndex;
+
+  return `${value.toFixed(value >= 10 || unitIndex === 0 ? 0 : 1)} ${units[unitIndex]}`;
+}
 
 export default function PostForm() {
   const { courseId, postId } = useParams();
   const navigate = useNavigate();
   const isEditing = Boolean(postId);
+  const fileInputRef = useRef(null);
 
   const [formData, setFormData] = useState({ title: '', category: 'GENERAL', body: '' });
+  const [attachments, setAttachments] = useState([]);
+  const [selectedFiles, setSelectedFiles] = useState([]);
+  const [fileInputKey, setFileInputKey] = useState(0);
   const [isLoading, setIsLoading] = useState(isEditing);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState('');
@@ -20,9 +36,13 @@ export default function PostForm() {
     if (isEditing) {
       const fetchExistingPost = async () => {
         try {
-          const data = await getPostDetail(courseId, postId);
+          const [data, postAttachments] = await Promise.all([
+            getPostDetail(courseId, postId),
+            getPostAttachments(postId),
+          ]);
           setFormData({ title: data.title, category: data.category, body: data.body });
-        } catch (err) {
+          setAttachments(postAttachments);
+        } catch {
           setError('Failed to load the post for editing.');
         } finally {
           setIsLoading(false);
@@ -37,6 +57,50 @@ export default function PostForm() {
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
+  const resetFilePicker = () => {
+    if (fileInputRef.current) {
+      fileInputRef.current.value = '';
+    }
+    setFileInputKey((prev) => prev + 1);
+  };
+
+  const handleOpenFilePicker = () => {
+    resetFilePicker();
+    window.setTimeout(() => fileInputRef.current?.click(), 0);
+  };
+
+  const handleFileChange = (e) => {
+    const files = Array.from(e.target.files || []);
+    if (files.length > 0) {
+      setSelectedFiles((prev) => [...prev, ...files]);
+    }
+    resetFilePicker();
+  };
+
+  const handleRemoveSelectedFile = (indexToRemove) => {
+    setSelectedFiles((prev) => prev.filter((_, index) => index !== indexToRemove));
+    resetFilePicker();
+  };
+
+  const handleDeleteAttachment = async (attachmentId) => {
+    if (!window.confirm('Remove this attachment from the post?')) return;
+
+    try {
+      await deleteAttachment(attachmentId);
+      setAttachments((prev) => prev.filter((attachment) => attachment.id !== attachmentId));
+      resetFilePicker();
+      setError('');
+    } catch (err) {
+      setError(err.message || 'Failed to delete attachment.');
+    }
+  };
+
+  const uploadSelectedFiles = async (savedPostId) => {
+    if (selectedFiles.length === 0) return;
+
+    await Promise.all(selectedFiles.map((file) => uploadPostAttachment(savedPostId, file)));
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setIsSubmitting(true);
@@ -45,10 +109,12 @@ export default function PostForm() {
     try {
       if (isEditing) {
         await updatePost(postId, formData);
+        await uploadSelectedFiles(postId);
         navigate(`/courses/${courseId}/posts/${postId}`);
       } else {
         const newPost = await createPost(courseId, formData);
         const createdId = newPost.post?.id || newPost.id;
+        await uploadSelectedFiles(createdId);
         navigate(`/courses/${courseId}/posts/${createdId}`);
       }
     } catch (err) {
@@ -128,6 +194,97 @@ export default function PostForm() {
               placeholder="Write the details of your post here..."
               className="board-input board-textarea-large"
             />
+          </div>
+
+          <div className="board-form-group">
+            <label className="board-form-label">Attachments</label>
+            <div className="attachment-upload-box">
+              <button type="button" onClick={handleOpenFilePicker} className="btn-secondary">
+                <Upload size={18} /> Add files
+              </button>
+              <span>Attach files students may need for this post.</span>
+              <input
+                key={fileInputKey}
+                ref={fileInputRef}
+                type="file"
+                multiple
+                onChange={handleFileChange}
+                className="visually-hidden-file-input"
+              />
+            </div>
+
+            {(attachments.length > 0 || selectedFiles.length > 0) && (
+              <div className="attachment-list attachment-list-form">
+                {attachments.map((attachment) => (
+                  <div key={attachment.id} className="attachment-item">
+                    <div className="attachment-file-meta">
+                      <File size={18} />
+                      <div>
+                        <a
+                          href={attachment.file_url}
+                          target="_blank"
+                          rel="noreferrer"
+                          className="attachment-name"
+                        >
+                          {attachment.file_name || 'Attachment'}
+                        </a>
+                        <span className="attachment-detail">
+                          {[attachment.file_extension, formatFileSize(attachment.file_size)]
+                            .filter(Boolean)
+                            .join(' | ')}
+                        </span>
+                      </div>
+                    </div>
+                    <div className="attachment-actions">
+                      <a
+                        href={attachment.file_url}
+                        target="_blank"
+                        rel="noreferrer"
+                        className="icon-link-button"
+                        aria-label={`Download ${attachment.file_name || 'attachment'}`}
+                      >
+                        <Download size={16} />
+                      </a>
+                      <button
+                        type="button"
+                        onClick={() => handleDeleteAttachment(attachment.id)}
+                        className="icon-link-button danger"
+                        aria-label={`Delete ${attachment.file_name || 'attachment'}`}
+                      >
+                        <Trash2 size={16} />
+                      </button>
+                    </div>
+                  </div>
+                ))}
+
+                {selectedFiles.map((file, index) => (
+                  <div
+                    key={`${file.name}-${file.lastModified}-${index}`}
+                    className="attachment-item pending"
+                  >
+                    <div className="attachment-file-meta">
+                      <Paperclip size={18} />
+                      <div>
+                        <span className="attachment-name">{file.name}</span>
+                        <span className="attachment-detail">
+                          {[formatFileSize(file.size), 'Ready to upload']
+                            .filter(Boolean)
+                            .join(' | ')}
+                        </span>
+                      </div>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => handleRemoveSelectedFile(index)}
+                      className="icon-link-button"
+                      aria-label={`Remove ${file.name}`}
+                    >
+                      <X size={16} />
+                    </button>
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
 
           <div className="board-form-actions">

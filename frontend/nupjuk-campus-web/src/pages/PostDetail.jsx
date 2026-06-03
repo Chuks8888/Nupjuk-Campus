@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { ArrowLeft, MessageSquare, Trash2, Edit2 } from 'lucide-react';
+import { ArrowLeft, Download, File, MessageSquare, Paperclip, Trash2, Edit2 } from 'lucide-react';
 import {
   getPostDetail,
   createComment,
@@ -8,15 +8,29 @@ import {
   updateComment,
   deleteComment,
 } from '../api/board';
+import { deleteAttachment, getPostAttachments } from '../api/attachments';
 import CommentCard from '../components/board/CommentCard';
 import '../styles/Board.css';
+
+function formatFileSize(bytes) {
+  const size = Number(bytes);
+  if (!size) return '';
+
+  const units = ['B', 'KB', 'MB', 'GB'];
+  const unitIndex = Math.min(Math.floor(Math.log(size) / Math.log(1024)), units.length - 1);
+  const value = size / 1024 ** unitIndex;
+
+  return `${value.toFixed(value >= 10 || unitIndex === 0 ? 0 : 1)} ${units[unitIndex]}`;
+}
 
 export default function PostDetail() {
   const { courseId, postId } = useParams();
   const navigate = useNavigate();
   const [post, setPost] = useState(null);
+  const [attachments, setAttachments] = useState([]);
   const [newComment, setNewComment] = useState('');
   const [isLoading, setIsLoading] = useState(true);
+  const [attachmentError, setAttachmentError] = useState('');
 
   const userString = localStorage.getItem('currentUser');
   const user = userString ? JSON.parse(userString) : null;
@@ -29,12 +43,29 @@ export default function PostDetail() {
   const loadPost = async () => {
     try {
       setIsLoading(true);
-      const data = await getPostDetail(courseId, postId);
+      const [data, postAttachments] = await Promise.all([
+        getPostDetail(courseId, postId),
+        getPostAttachments(postId),
+      ]);
       setPost(data);
+      setAttachments(postAttachments);
+      setAttachmentError('');
     } catch (error) {
       console.error('Failed to load post', error);
     } finally {
       setIsLoading(false);
+    }
+  };
+
+  const handleDeleteAttachment = async (attachmentId) => {
+    if (!window.confirm('Remove this attachment from the post?')) return;
+
+    try {
+      await deleteAttachment(attachmentId);
+      setAttachments((prev) => prev.filter((attachment) => attachment.id !== attachmentId));
+    } catch (error) {
+      console.error('Failed to delete attachment', error);
+      setAttachmentError(error.message || 'Failed to delete attachment.');
     }
   };
 
@@ -140,6 +171,67 @@ export default function PostDetail() {
 
         <h1>{post.title}</h1>
         <p className="post-body">{post.body}</p>
+
+        <section className="attachments-panel" aria-labelledby="post-attachments-heading">
+          <div className="attachments-header">
+            <h3 id="post-attachments-heading">
+              <Paperclip size={18} /> Attachments
+            </h3>
+            <span>{attachments.length}</span>
+          </div>
+
+          {attachmentError && <div className="board-error-banner">{attachmentError}</div>}
+
+          {attachments.length > 0 ? (
+            <div className="attachment-list">
+              {attachments.map((attachment) => (
+                <div key={attachment.id} className="attachment-item">
+                  <div className="attachment-file-meta">
+                    <File size={18} />
+                    <div>
+                      <a
+                        href={attachment.file_url}
+                        target="_blank"
+                        rel="noreferrer"
+                        className="attachment-name"
+                      >
+                        {attachment.file_name || 'Attachment'}
+                      </a>
+                      <span className="attachment-detail">
+                        {[attachment.file_extension, formatFileSize(attachment.file_size)]
+                          .filter(Boolean)
+                          .join(' | ')}
+                      </span>
+                    </div>
+                  </div>
+                  <div className="attachment-actions">
+                    <a
+                      href={attachment.file_url}
+                      target="_blank"
+                      rel="noreferrer"
+                      className="icon-link-button"
+                      aria-label={`Download ${attachment.file_name || 'attachment'}`}
+                    >
+                      <Download size={16} />
+                    </a>
+                    {isAuthor && (
+                      <button
+                        type="button"
+                        onClick={() => handleDeleteAttachment(attachment.id)}
+                        className="icon-link-button danger"
+                        aria-label={`Delete ${attachment.file_name || 'attachment'}`}
+                      >
+                        <Trash2 size={16} />
+                      </button>
+                    )}
+                  </div>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <p className="attachments-empty">No attachments added.</p>
+          )}
+        </section>
       </article>
 
       <section className="comments-section">
