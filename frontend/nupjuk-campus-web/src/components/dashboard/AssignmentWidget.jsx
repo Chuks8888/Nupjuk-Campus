@@ -27,7 +27,6 @@ export default function AssignmentWidget({ assignments }) {
     <div className="widget-container">
       <div className="section-header">
         <h2>Upcoming Deadlines</h2>
-        <span className="action-text">Calendar &gt;</span>
       </div>
 
       {upcomingAssignments.length === 0 ? (
