@@ -45,8 +45,8 @@ export default function CalendarGrid({ currentDate, selectedDate, eventsByDate, 
             >
               <div className="cell-date">{day}</div>
 
-              <div className="event-dots">
-                {dayEvents.slice(0, 6).map((evt) => {
+              <div className="calendar-cell-events">
+                {dayEvents.slice(0, 3).map((evt) => {
                   const codeStr = String(evt.courseCode || evt.courseName || '');
                   const prefix = codeStr.replace(/[0-9]/g, '');
                   const color =
@@ -56,12 +56,14 @@ export default function CalendarGrid({ currentDate, selectedDate, eventsByDate, 
                     <div
                       key={evt.id}
                       title={evt.title}
-                      className="event-dot"
-                      style={{ backgroundColor: color }}
-                    />
+                      className="calendar-cell-event"
+                      style={{ borderLeftColor: color }}
+                    >
+                      {evt.title}
+                    </div>
                   );
                 })}
-                {dayEvents.length > 6 && <div className="event-more">+{dayEvents.length - 6}</div>}
+                {dayEvents.length > 3 && <div className="event-more">+{dayEvents.length - 3}</div>}
               </div>
             </div>
           );
