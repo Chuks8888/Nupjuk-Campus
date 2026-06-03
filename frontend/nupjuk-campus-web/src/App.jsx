@@ -7,6 +7,7 @@ import CourseDetail from './pages/CourseDetail';
 import PostDetail from './pages/PostDetail';
 import PostForm from './components/board/PostForm';
 import Calendar from './pages/Calendar';
+import Alerts from './pages/Alerts';
 
 import MainLayout from './layouts/MainLayout';
 import ProtectedRoute from './routes/ProtectedRoute';
@@ -28,6 +29,7 @@ function App() {
             <Route path="/courses/:courseId/posts/new" element={<PostForm />} />
             <Route path="/courses/:courseId/posts/:postId/edit" element={<PostForm />} />
             <Route path="/calendar" element={<Calendar />} />
+            <Route path="/alerts" element={<Alerts />} />
           </Route>
         </Route>
 

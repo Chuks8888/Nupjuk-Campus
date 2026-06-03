@@ -1,3 +1,4 @@
+import { useEffect, useState } from 'react';
 import { NavLink, Outlet, useNavigate } from 'react-router-dom';
 import {
   Home as HomeIcon,
@@ -9,6 +10,7 @@ import {
   LogOut,
 } from 'lucide-react';
 import { clearSession } from '../api/auth';
+import { getNotifications } from '../api/notifications';
 import '../styles/MainLayout.css';
 
 const NAV_ITEMS = [
@@ -21,6 +23,7 @@ const NAV_ITEMS = [
 
 export default function MainLayout() {
   const navigate = useNavigate();
+  const [hasUnreadNotifications, setHasUnreadNotifications] = useState(false);
 
   const userString = localStorage.getItem('currentUser');
   const user = userString ? JSON.parse(userString) : null;
@@ -30,6 +33,34 @@ export default function MainLayout() {
     clearSession();
     navigate('/login');
   };
+
+  useEffect(() => {
+    let isMounted = true;
+
+    const loadUnreadStatus = async () => {
+      try {
+        const response = await getNotifications({ limit: 1, unreadOnly: true });
+        const unreadCount = response.meta?.unreadCount ?? response.data.length;
+        if (isMounted) {
+          setHasUnreadNotifications(unreadCount > 0);
+        }
+      } catch (error) {
+        if (isMounted) {
+          setHasUnreadNotifications(false);
+        }
+      }
+    };
+
+    loadUnreadStatus();
+    window.addEventListener('focus', loadUnreadStatus);
+    window.addEventListener('notifications:updated', loadUnreadStatus);
+
+    return () => {
+      isMounted = false;
+      window.removeEventListener('focus', loadUnreadStatus);
+      window.removeEventListener('notifications:updated', loadUnreadStatus);
+    };
+  }, []);
 
   return (
     <div className="app-layout">
@@ -43,7 +74,12 @@ export default function MainLayout() {
         <nav className="sidebar-nav">
           {NAV_ITEMS.map(({ path, icon: Icon, label }) => (
             <NavLink key={path} to={path} className="nav-item">
-              <Icon size={24} />
+              <span className="nav-icon-wrap">
+                <Icon size={24} />
+                {path === '/alerts' && hasUnreadNotifications && (
+                  <span className="notification-dot" aria-label="Unread notifications" />
+                )}
+              </span>
               <span className="nav-label">{label}</span>
             </NavLink>
           ))}

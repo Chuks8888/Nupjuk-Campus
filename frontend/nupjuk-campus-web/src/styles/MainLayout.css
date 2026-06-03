@@ -60,6 +60,25 @@
   transition: all 0.2s ease;
 }
 
+.nav-icon-wrap {
+  position: relative;
+  display: inline-flex;
+  width: 24px;
+  height: 24px;
+  flex: 0 0 24px;
+}
+
+.notification-dot {
+  position: absolute;
+  top: -2px;
+  right: -2px;
+  width: 9px;
+  height: 9px;
+  border: 2px solid var(--bg-surface);
+  border-radius: 50%;
+  background: var(--danger-text);
+}
+
 .nav-item:hover {
   background-color: var(--nav-hover);
   color: var(--text-body);
