@@ -58,6 +58,7 @@ function normalizeMeeting(meeting) {
   return {
     id: String(meeting.id),
     raw_id: meeting.id,
+    course_id: String(meeting.courseId ?? ''),
     title: meeting.title,
     description: meeting.description,
     status: meeting.status,
@@ -67,6 +68,21 @@ function normalizeMeeting(meeting) {
     time_range_end: meeting.timeRangeEnd,
     creator_name: meeting.creator?.displayName || meeting.creator?.kaistEmail || 'Unknown',
     participant_count: meeting.participants?.length ?? 0,
+    my_available_slots: (meeting.myAvailableSlots || []).map((slot) => new Date(slot).toISOString()),
+    participants:
+      meeting.participants?.map((participant) => ({
+        id: String(participant.userId ?? participant.user?.id ?? participant.id),
+        raw_id: participant.userId ?? participant.user?.id ?? participant.id,
+        name: participant.user?.displayName || participant.user?.kaistEmail || 'Unknown',
+      })) ?? [],
+    availabilities:
+      meeting.availabilities?.map((availability) => ({
+        user_id: availability.userId,
+        user_name: availability.user?.displayName || availability.user?.kaistEmail || 'Unknown',
+        available_slots: (availability.availableSlots || []).map((slot) =>
+          new Date(slot).toISOString()
+        ),
+      })) ?? [],
   };
 }
 
@@ -98,6 +114,34 @@ export async function getCoursePosts(courseId) {
 export async function getCourseMeetings(courseId) {
   const meetings = await apiRequest(`/meetings/course/${courseId}`);
   return meetings.map(normalizeMeeting);
+}
+
+export async function getMeetingDetail(meetingId) {
+  return normalizeMeeting(await apiRequest(`/meetings/${meetingId}`));
+}
+
+export async function createCourseMeeting(courseId, meeting) {
+  const response = await apiRequest('/meetings', {
+    method: 'POST',
+    body: {
+      courseId,
+      title: meeting.title,
+      description: meeting.description,
+      dateRangeStart: meeting.dateRangeStart,
+      dateRangeEnd: meeting.dateRangeEnd,
+      timeRangeStart: meeting.timeRangeStart,
+      timeRangeEnd: meeting.timeRangeEnd,
+    },
+  });
+
+  return response.meeting ? normalizeMeeting(response.meeting) : response;
+}
+
+export async function saveMeetingAvailability(meetingId, availableSlots) {
+  return await apiRequest(`/meetings/${meetingId}/availability`, {
+    method: 'PUT',
+    body: { availableSlots },
+  });
 }
 
 export async function updateAssignmentStatus(courseId, assignmentId, status) {
