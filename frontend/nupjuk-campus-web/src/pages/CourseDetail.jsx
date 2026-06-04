@@ -6,6 +6,7 @@ import CourseBoard from '../components/courses/CourseBoard';
 import CourseTasks from '../components/courses/CourseTasks';
 import CourseMeetings from '../components/courses/CourseMeetings';
 import {
+  createCourseMeeting,
   getCourse,
   getCourseAssignments,
   getCourseMeetings,
@@ -72,6 +73,12 @@ export default function CourseDetail() {
     }
   };
 
+  const handleCreateMeeting = async (meeting) => {
+    await createCourseMeeting(courseId, meeting);
+    const updatedMeetings = await getCourseMeetings(courseId);
+    setMeetings(updatedMeetings);
+  };
+
   if (isLoading) return <div className="course-detail-container">Loading course...</div>;
   if (error) return <div className="course-detail-container">{error}</div>;
   if (!course) return <div className="course-detail-container">Course not found</div>;
@@ -110,7 +117,9 @@ export default function CourseDetail() {
           <CourseTasks assignments={assignments} onStatusChange={handleAssignmentStatusChange} />
         )}
 
-        {activeTab === 'meetings' && <CourseMeetings meetings={meetings} />}
+        {activeTab === 'meetings' && (
+          <CourseMeetings meetings={meetings} onCreateMeeting={handleCreateMeeting} />
+        )}
       </div>
     </div>
   );

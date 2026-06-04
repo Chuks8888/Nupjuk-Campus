@@ -167,3 +167,157 @@
   align-items: center;
   gap: 0.35rem;
 }
+
+.course-meetings {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.meetings-header {
+  display: flex;
+  justify-content: flex-end;
+}
+
+.meeting-create-button,
+.meeting-primary-button,
+.meeting-secondary-button {
+  border: 1px solid var(--border-main);
+  border-radius: 8px;
+  font-family: inherit;
+  font-weight: 600;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.45rem;
+  transition:
+    background-color 0.2s ease,
+    border-color 0.2s ease,
+    color 0.2s ease;
+}
+
+.meeting-create-button,
+.meeting-primary-button {
+  background: var(--brand-blue);
+  border-color: var(--brand-blue);
+  color: white;
+  padding: 0.65rem 0.9rem;
+}
+
+.meeting-create-button:hover,
+.meeting-primary-button:hover:not(:disabled) {
+  background: #2563eb;
+  border-color: #2563eb;
+}
+
+.meeting-primary-button:disabled {
+  cursor: not-allowed;
+  opacity: 0.65;
+}
+
+.meeting-secondary-button {
+  background: var(--bg-surface);
+  color: var(--text-body);
+  padding: 0.65rem 0.9rem;
+}
+
+.meeting-secondary-button:hover {
+  border-color: var(--brand-blue);
+  color: var(--brand-blue);
+}
+
+.meeting-form {
+  border: 1px solid var(--border-main);
+  border-radius: 8px;
+  background: var(--bg-surface);
+  padding: 1rem;
+  text-align: left;
+}
+
+.meeting-form-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 0.875rem;
+}
+
+.meeting-form-field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+  min-width: 0;
+}
+
+.meeting-form-field span {
+  color: var(--text-strong);
+  font-size: 0.85rem;
+  font-weight: 600;
+}
+
+.meeting-form-field input,
+.meeting-form-field textarea {
+  width: 100%;
+  box-sizing: border-box;
+  border: 1px solid var(--border-main);
+  border-radius: 8px;
+  background: var(--bg-base);
+  color: var(--text-body);
+  font: inherit;
+  padding: 0.65rem 0.75rem;
+}
+
+.meeting-form-field textarea {
+  resize: vertical;
+}
+
+.meeting-form-field input:focus,
+.meeting-form-field textarea:focus {
+  outline: none;
+  border-color: var(--brand-blue);
+  box-shadow: 0 0 0 3px var(--nav-active-bg);
+}
+
+.meeting-form-title,
+.meeting-form-description {
+  grid-column: span 2;
+}
+
+.meeting-form-error {
+  margin: 0.875rem 0 0;
+  color: var(--danger-text);
+  font-size: 0.9rem;
+}
+
+.meeting-form-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.75rem;
+  margin-top: 1rem;
+}
+
+@media (max-width: 720px) {
+  .meeting-form-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 520px) {
+  .meeting-form-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .meeting-form-title,
+  .meeting-form-description {
+    grid-column: span 1;
+  }
+
+  .meeting-form-actions {
+    flex-direction: column-reverse;
+  }
+
+  .meeting-create-button,
+  .meeting-primary-button,
+  .meeting-secondary-button {
+    width: 100%;
+  }
+}
