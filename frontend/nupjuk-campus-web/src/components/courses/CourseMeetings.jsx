@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { CalendarDays, Clock, Plus, Users } from 'lucide-react';
 import DetailCard from '../common/DetailCard';
 
@@ -36,7 +37,8 @@ function formatTime(timeString) {
   });
 }
 
-export default function CourseMeetings({ meetings, onCreateMeeting }) {
+export default function CourseMeetings({ courseId, meetings, onCreateMeeting }) {
+  const navigate = useNavigate();
   const today = getTodayDate();
   const [showForm, setShowForm] = useState(false);
   const [formData, setFormData] = useState({
@@ -209,26 +211,32 @@ export default function CourseMeetings({ meetings, onCreateMeeting }) {
       ) : (
         <div className="detail-list-container">
           {meetings.map((meeting) => (
-            <DetailCard
+            <button
               key={meeting.id}
-              category={meeting.status}
-              author={meeting.creator_name}
-              title={meeting.title}
-              description={meeting.description || 'No description.'}
-              metaLeft={
-                <>
-                  <CalendarDays size={14} />{' '}
-                  {formatDateRange(meeting.date_range_start, meeting.date_range_end)}
-                  <Clock size={14} /> {formatTime(meeting.time_range_start)} -{' '}
-                  {formatTime(meeting.time_range_end)}
-                </>
-              }
-              metaRight={
-                <>
-                  <Users size={14} /> {meeting.participant_count} participants
-                </>
-              }
-            />
+              type="button"
+              className="meeting-card-button"
+              onClick={() => navigate(`/courses/${courseId}/meetings/${meeting.id}`)}
+            >
+              <DetailCard
+                category={meeting.status}
+                author={meeting.creator_name}
+                title={meeting.title}
+                description={meeting.description || 'No description.'}
+                metaLeft={
+                  <>
+                    <CalendarDays size={14} />{' '}
+                    {formatDateRange(meeting.date_range_start, meeting.date_range_end)}
+                    <Clock size={14} /> {formatTime(meeting.time_range_start)} -{' '}
+                    {formatTime(meeting.time_range_end)}
+                  </>
+                }
+                metaRight={
+                  <>
+                    <Users size={14} /> {meeting.participant_count} participants
+                  </>
+                }
+              />
+            </button>
           ))}
         </div>
       )}

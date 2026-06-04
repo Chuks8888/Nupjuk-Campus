@@ -4,6 +4,7 @@ import Register from './pages/Register';
 import Home from './pages/Home';
 import Courses from './pages/Courses';
 import CourseDetail from './pages/CourseDetail';
+import MeetingDetail from './pages/MeetingDetail';
 import PostDetail from './pages/PostDetail';
 import PostForm from './components/board/PostForm';
 import Calendar from './pages/Calendar';
@@ -25,6 +26,7 @@ function App() {
             <Route path="/home" element={<Home />} />
             <Route path="/courses" element={<Courses />} />
             <Route path="/courses/:courseId" element={<CourseDetail />} />
+            <Route path="/courses/:courseId/meetings/:meetingId" element={<MeetingDetail />} />
             <Route path="/courses/:courseId/posts/:postId" element={<PostDetail />} />
             <Route path="/courses/:courseId/posts/new" element={<PostForm />} />
             <Route path="/courses/:courseId/posts/:postId/edit" element={<PostForm />} />

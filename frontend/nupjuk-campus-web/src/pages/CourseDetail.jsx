@@ -118,7 +118,11 @@ export default function CourseDetail() {
         )}
 
         {activeTab === 'meetings' && (
-          <CourseMeetings meetings={meetings} onCreateMeeting={handleCreateMeeting} />
+          <CourseMeetings
+            courseId={courseId}
+            meetings={meetings}
+            onCreateMeeting={handleCreateMeeting}
+          />
         )}
       </div>
     </div>
