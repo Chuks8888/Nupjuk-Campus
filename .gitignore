@@ -432,3 +432,4 @@ FodyWeavers.xsd
 dist/
 frontend/nupjuk-campus-web/dist/
 prisma.config.js
+.DS_Store
