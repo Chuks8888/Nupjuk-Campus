@@ -79,6 +79,21 @@ export function storeSession({ token, user }) {
   }
 }
 
+export function syncAuthTokenToExtension() {
+  const token = localStorage.getItem('authToken');
+
+  if (!token) return;
+
+  window.postMessage(
+    {
+      source: "NUPJUK_WEB",
+      type: "NUPJUK_AUTH_TOKEN",
+      token,
+    },
+    "*"
+  );
+}
+
 export function clearSession() {
   localStorage.removeItem('authToken');
   localStorage.removeItem(CURRENT_USER_KEY);

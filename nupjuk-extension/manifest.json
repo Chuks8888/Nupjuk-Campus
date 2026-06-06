@@ -3,14 +3,15 @@
   "name": "Nupjuk Campus Sync",
   "version": "0.1.0",
   "description": "Parse KLMS page data for Nupjuk Campus.",
-  "permissions": [],
+  "permissions": ["storage"],
   "host_permissions": [
     "https://klms.kaist.ac.kr/*"
   ],
   "content_scripts": [
     {
       "matches": [
-        "https://klms.kaist.ac.kr/*"
+        "https://klms.kaist.ac.kr/*",
+        "http://localhost:5173/*"
       ],
       "js": [
         "content.js"

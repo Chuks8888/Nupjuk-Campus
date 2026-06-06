@@ -13,7 +13,14 @@ import Alerts from './pages/Alerts';
 import MainLayout from './layouts/MainLayout';
 import ProtectedRoute from './routes/ProtectedRoute';
 
+import { useEffect } from 'react';
+import { syncAuthTokenToExtension } from './api/auth';
+
 function App() {
+  useEffect(() => {
+    syncAuthTokenToExtension();
+  }, []);
+  
   return (
     <Router>
       <Routes>
