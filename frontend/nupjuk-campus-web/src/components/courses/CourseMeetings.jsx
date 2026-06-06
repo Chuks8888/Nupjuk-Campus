@@ -218,7 +218,6 @@ export default function CourseMeetings({ courseId, meetings, onCreateMeeting }) 
               onClick={() => navigate(`/courses/${courseId}/meetings/${meeting.id}`)}
             >
               <DetailCard
-                category={meeting.status}
                 author={meeting.creator_name}
                 title={meeting.title}
                 description={meeting.description || 'No description.'}

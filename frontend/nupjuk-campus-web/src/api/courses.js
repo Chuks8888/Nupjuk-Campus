@@ -61,7 +61,6 @@ function normalizeMeeting(meeting) {
     course_id: String(meeting.courseId ?? ''),
     title: meeting.title,
     description: meeting.description,
-    status: meeting.status,
     date_range_start: meeting.dateRangeStart,
     date_range_end: meeting.dateRangeEnd,
     time_range_start: meeting.timeRangeStart,
@@ -148,7 +147,7 @@ export async function updateAssignmentStatus(courseId, assignmentId, status) {
   const response = await apiRequest(`/courses/${courseId}/assignments/${assignmentId}/status`, {
     method: 'POST',
     body: {
-      userCompletionStatus: status, // possible: 'done' or 'todo' or 'completed', custom are possible but these are required for marking completion
+      userCompletionStatus: status,
     },
   });
 

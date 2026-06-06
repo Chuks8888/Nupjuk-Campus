@@ -1,5 +1,6 @@
 import express from "express";
 import cors from "cors";
+import { createServer } from "http";
 import authRouter from "./routes/auth";
 import meRouter from "./routes/me";
 import ingestRouter from "./routes/ingest";
@@ -13,8 +14,10 @@ import notificationsRouter from "./routes/notifications";
 import path from "path";
 import attachmentsRouter from "./routes/attachments";
 import { cleanupExpiredAttachments } from "./jobs/cleanupExpiredAttachments";
+import { setupRealtime } from "./realtime";
 
 const app = express();
+const server = createServer(app);
 
 app.use(cors());
 app.use(express.json());
@@ -42,6 +45,8 @@ setInterval(() => {
 
 const PORT = Number(process.env.PORT) || 3000;
 
-app.listen(PORT, () => {
+setupRealtime(server);
+
+server.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
 });

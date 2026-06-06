@@ -24,7 +24,8 @@ COPY prisma ./prisma
 RUN DATABASE_URL=postgresql://nupjuk:nupjuk@localhost:5432/nupjuk npx prisma generate
 COPY --from=build /app/dist ./dist
 COPY docker-entrypoint.sh /usr/local/bin/docker-entrypoint.sh
-RUN chmod +x /usr/local/bin/docker-entrypoint.sh \
+RUN sed -i 's/\r$//' /usr/local/bin/docker-entrypoint.sh \
+  && chmod +x /usr/local/bin/docker-entrypoint.sh \
   && mkdir -p uploads
 EXPOSE 3000
 ENTRYPOINT ["docker-entrypoint.sh"]

@@ -407,6 +407,8 @@
   border: 1px solid var(--border-main);
   border-radius: 8px;
   overflow: hidden;
+  touch-action: none;
+  user-select: none;
 }
 
 .meeting-grid-row {
@@ -445,8 +447,8 @@
 }
 
 .meeting-slot {
-  background: var(--bg-surface);
-  color: var(--text-muted);
+  background: rgba(0, 122, 255, calc(0.08 + var(--slot-heat, 0) * 0.45));
+  color: var(--text-strong);
   border-top: 0;
   border-left: 0;
   font: inherit;
@@ -455,12 +457,12 @@
 }
 
 .meeting-slot:hover {
-  background: var(--nav-hover);
+  box-shadow: inset 0 0 0 2px rgba(0, 122, 255, 0.45);
 }
 
 .meeting-slot.selected {
-  background: var(--nav-active-bg);
-  color: var(--brand-blue);
+  background: rgba(52, 199, 89, calc(0.18 + var(--slot-heat, 0) * 0.35));
+  color: var(--text-strong);
   box-shadow: inset 0 0 0 2px var(--brand-blue);
 }
 

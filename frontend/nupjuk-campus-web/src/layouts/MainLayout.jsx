@@ -4,7 +4,6 @@ import {
   Home as HomeIcon,
   BookOpen,
   Calendar,
-  Users,
   Bell,
   GraduationCap,
   LogOut,
@@ -17,7 +16,6 @@ const NAV_ITEMS = [
   { path: '/home', icon: HomeIcon, label: 'Home' },
   { path: '/courses', icon: BookOpen, label: 'Courses' },
   { path: '/calendar', icon: Calendar, label: 'Calendar' },
-  { path: '/meetings', icon: Users, label: 'Meetings' },
   { path: '/alerts', icon: Bell, label: 'Alerts' },
 ];
 
@@ -64,7 +62,6 @@ export default function MainLayout() {
 
   return (
     <div className="app-layout">
-      {/* Sidebar Navigation */}
       <aside className="sidebar">
         <div className="sidebar-brand">
           <GraduationCap size={32} color="#007AFF" />
@@ -98,7 +95,6 @@ export default function MainLayout() {
         </nav>
       </aside>
 
-      {/* Main Content Area */}
       <main className="main-content">
         <Outlet />
       </main>

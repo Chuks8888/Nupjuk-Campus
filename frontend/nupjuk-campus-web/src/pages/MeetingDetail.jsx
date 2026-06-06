@@ -1,7 +1,8 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { ArrowLeft, CalendarDays, Clock, Users } from 'lucide-react';
 import { getMeetingDetail, saveMeetingAvailability } from '../api/courses';
+import { connectMeetingRealtime } from '../api/realtime';
 import '../styles/CourseDetail.css';
 
 const SLOT_MINUTES = 30;
@@ -77,14 +78,19 @@ export default function MeetingDetail() {
   const [isSaving, setIsSaving] = useState(false);
   const [error, setError] = useState('');
   const [saveMessage, setSaveMessage] = useState('');
+  const dragState = useRef({ active: false, mode: 'add', slots: new Set() });
 
-  const loadMeeting = async () => {
+  const loadMeeting = async ({ preserveSelection = false } = {}) => {
     try {
-      setIsLoading(true);
+      if (!preserveSelection) {
+        setIsLoading(true);
+      }
       setError('');
       const data = await getMeetingDetail(meetingId);
       setMeeting(data);
-      setSelectedSlots(new Set(data.my_available_slots));
+      if (!preserveSelection) {
+        setSelectedSlots(new Set(data.my_available_slots));
+      }
     } catch (err) {
       setError(err.message || 'Failed to load meeting.');
     } finally {
@@ -95,6 +101,27 @@ export default function MeetingDetail() {
   useEffect(() => {
     loadMeeting();
   }, [meetingId]);
+
+  useEffect(() => {
+    return connectMeetingRealtime(meetingId, () => {
+      loadMeeting({ preserveSelection: true });
+    });
+  }, [meetingId]);
+
+  useEffect(() => {
+    const finishDrag = () => {
+      dragState.current.active = false;
+      dragState.current.slots.clear();
+    };
+
+    window.addEventListener('pointerup', finishDrag);
+    window.addEventListener('pointercancel', finishDrag);
+
+    return () => {
+      window.removeEventListener('pointerup', finishDrag);
+      window.removeEventListener('pointercancel', finishDrag);
+    };
+  }, []);
 
   const dateKeys = useMemo(() => {
     if (!meeting) return [];
@@ -119,22 +146,51 @@ export default function MeetingDetail() {
     return counts;
   }, [meeting]);
 
+  const maxSlotCount = useMemo(() => {
+    return Math.max(1, ...Array.from(slotCounts.values()));
+  }, [slotCounts]);
+
   const dateRangeLabel =
     dateKeys.length > 0
       ? `${formatDate(dateKeys[0])} - ${formatDate(dateKeys[dateKeys.length - 1])}`
       : 'Date not set';
 
-  const toggleSlot = (slot) => {
+  const applySlot = (slot, mode) => {
     setSaveMessage('');
     setSelectedSlots((current) => {
       const next = new Set(current);
-      if (next.has(slot)) {
+
+      if (mode === 'remove') {
         next.delete(slot);
       } else {
         next.add(slot);
       }
       return next;
     });
+  };
+
+  const handleSlotPointerDown = (event, slot, isSelected) => {
+    event.preventDefault();
+    const mode = isSelected ? 'remove' : 'add';
+    dragState.current = { active: true, mode, slots: new Set([slot]) };
+    applySlot(slot, mode);
+  };
+
+  const handleSlotPointerEnter = (slot) => {
+    if (!dragState.current.active || dragState.current.slots.has(slot)) return;
+
+    dragState.current.slots.add(slot);
+    applySlot(slot, dragState.current.mode);
+  };
+
+  const handleGridPointerMove = (event) => {
+    if (!dragState.current.active) return;
+
+    const target = document.elementFromPoint(event.clientX, event.clientY)?.closest('[data-slot]');
+    const slot = target?.getAttribute('data-slot');
+    if (slot) {
+      handleSlotPointerEnter(slot);
+    }
   };
 
   const handleSave = async () => {
@@ -170,7 +226,6 @@ export default function MeetingDetail() {
 
       <header className="meeting-detail-header">
         <div>
-          <span className="detail-card-category">{meeting.status}</span>
           <h1>{meeting.title}</h1>
           <p>{meeting.description || 'No description.'}</p>
         </div>
@@ -210,6 +265,7 @@ export default function MeetingDetail() {
         <div className="meeting-grid-scroll">
           <div
             className="meeting-availability-grid"
+            onPointerMove={handleGridPointerMove}
             style={{ gridTemplateColumns: `84px repeat(${dateKeys.length}, minmax(92px, 1fr))` }}
           >
             <div className="meeting-grid-corner" />
@@ -226,13 +282,17 @@ export default function MeetingDetail() {
                   const slot = getSlotIso(dateKey, time);
                   const isSelected = selectedSlots.has(slot);
                   const count = slotCounts.get(slot) || 0;
+                  const heat = count / maxSlotCount;
 
                   return (
                     <button
                       key={slot}
                       type="button"
+                      data-slot={slot}
                       className={`meeting-slot${isSelected ? ' selected' : ''}`}
-                      onClick={() => toggleSlot(slot)}
+                      onPointerDown={(event) => handleSlotPointerDown(event, slot, isSelected)}
+                      onPointerEnter={() => handleSlotPointerEnter(slot)}
+                      style={{ '--slot-heat': heat }}
                     >
                       {count}
                     </button>

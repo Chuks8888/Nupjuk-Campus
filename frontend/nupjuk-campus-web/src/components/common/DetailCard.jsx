@@ -3,7 +3,7 @@ export default function DetailCard({ category, author, title, description, metaL
   return (
     <article className="detail-card">
       <div className="detail-card-header">
-        <span className="detail-card-category">{category}</span>
+        {category ? <span className="detail-card-category">{category}</span> : <span />}
         <span className="detail-card-author">{author}</span>
       </div>
       <h3>{title}</h3>

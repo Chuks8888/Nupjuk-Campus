@@ -1,6 +1,7 @@
 import { Router, Response } from "express";
 import { prisma } from "../db";
 import { authenticateToken, AuthRequest } from "../middleware/auth";
+import { broadcastMeetingUpdate } from "../realtime";
 
 const router = Router();
 
@@ -162,7 +163,6 @@ router.post("/", authenticateToken, async (req: AuthRequest, res: Response) => {
           dateRangeEnd: new Date(dateRangeEnd),
           timeRangeStart,
           timeRangeEnd,
-          status: "open",
         },
       });
 
@@ -224,6 +224,8 @@ router.put("/:meetingId/availability", authenticateToken, async (req: AuthReques
         create: { meetingEventId: meetingId, userId, availableSlots: normalizedSlots },
       });
     });
+
+    broadcastMeetingUpdate(meetingId);
 
     return res.json({ message: "Availability saved.", availability });
   } catch (error) {
