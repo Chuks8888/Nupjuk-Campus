@@ -19,11 +19,24 @@ function normalizeCourse(course) {
 
 function normalizeAssignment(assignment) {
   const status = assignment.userStatuses?.[0];
+
   const completionStatus =
     status?.userCompletionStatus ??
     assignment.userCompletionStatus ??
     assignment.user_completion_status ??
     'todo';
+
+  const klmsSubmissionStatus =
+    status?.klmsSubmissionStatus ??
+    assignment.klmsSubmissionStatus ??
+    assignment.klms_submission_status ??
+    'not_submitted';
+
+  const klmsTimingStatus =
+    status?.klmsTimingStatus ??
+    assignment.klmsTimingStatus ??
+    assignment.klms_timing_status ??
+    'on_time';
 
   return {
     id: String(assignment.id),
@@ -35,7 +48,10 @@ function normalizeAssignment(assignment) {
     description: assignment.description,
     source: assignment.source,
     assignment_url: assignment.assignmentUrl,
-    klms_submission_status: status?.klmsSubmissionStatus ?? assignment.klmsSubmissionStatus,
+
+    klms_submission_status: klmsSubmissionStatus,
+    klms_timing_status: klmsTimingStatus,
+
     user_completion_status: completionStatus,
   };
 }
