@@ -1,0 +1,12 @@
+.git
+.gitignore
+node_modules
+dist
+uploads
+*.log
+.env
+.env.*
+*.pdf
+frontend
+Yilei
+nupjuk-extension

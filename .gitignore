@@ -427,3 +427,9 @@ FodyWeavers.xsd
 *.msix
 *.msm
 *.msp
+
+# Node / Docker build output
+dist/
+frontend/nupjuk-campus-web/dist/
+prisma.config.js
+.DS_Store

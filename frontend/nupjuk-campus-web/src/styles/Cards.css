@@ -1,0 +1,236 @@
+.dashboard-section {
+  margin-bottom: 3rem;
+}
+
+.section-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  margin-bottom: 1.25rem;
+}
+
+.section-header h2 {
+  font-size: 1.5rem;
+  color: var(--text-strong);
+  margin: 0;
+}
+
+.section-header .action-text,
+.section-header .meta-text {
+  font-size: 0.95rem;
+}
+
+.section-header .action-text {
+  color: var(--brand-blue);
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.section-header .meta-text {
+  color: var(--text-muted);
+}
+
+.card {
+  background-color: var(--bg-surface);
+  border: 1px solid var(--border-main);
+  border-radius: 12px;
+  margin-bottom: 12px;
+  display: flex;
+  align-items: center;
+  padding: 16px;
+  gap: 16px;
+  box-shadow: var(--shadow-sm);
+  position: relative;
+  overflow: hidden;
+  transition:
+    transform 0.2s ease,
+    box-shadow 0.2s ease,
+    opacity 0.2s ease;
+  cursor: pointer;
+}
+
+.card:hover {
+  transform: translateY(-2px);
+}
+
+.card.completed {
+  opacity: 0.7;
+  background-color: var(--bg-base);
+}
+
+.card.assignment-card {
+  align-items: flex-start;
+  cursor: default;
+  gap: 12px;
+}
+
+.card-content {
+  text-align: left;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.card-content h3,
+.card-content h4,
+.card-title {
+  font-size: 1.1rem;
+  font-weight: 600;
+  margin: 0;
+  color: var(--text-strong);
+}
+
+.card.completed .card-content h4,
+.card.completed .card-title {
+  text-decoration: line-through;
+  color: var(--text-muted);
+}
+
+.card-content p,
+.card-deadline {
+  margin: 0;
+  font-size: 0.95rem;
+  color: var(--text-muted);
+}
+
+.card-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 48px;
+  height: 48px;
+  background-color: var(--bg-base);
+  border-radius: 10px;
+  flex-shrink: 0;
+}
+
+.course-icon {
+  color: white;
+  font-weight: bold;
+  font-size: 1.2rem;
+}
+
+.card-icon-btn {
+  background: none;
+  border: none;
+  padding: 0;
+  margin-top: 2px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  transition: transform 0.1s ease;
+}
+
+.card-icon-btn:active {
+  transform: scale(0.9);
+}
+
+.card-left-band {
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 6px;
+  background-color: var(--course-color, var(--brand-blue));
+}
+
+.expand-btn {
+  background: none;
+  border: none;
+  padding: 4px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  align-self: flex-start;
+}
+
+.expand-icon {
+  transition: transform 0.2s ease;
+}
+
+.expand-icon.expanded {
+  transform: rotate(90deg);
+}
+
+.card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 0.85rem;
+  font-weight: 600;
+}
+
+.countdown {
+  background: var(--bg-base);
+  padding: 4px 10px;
+  border-radius: 12px;
+  color: var(--text-strong);
+  font-weight: 500;
+}
+
+.countdown.overdue {
+  background: var(--danger-bg);
+  color: var(--danger-text);
+}
+
+.card-statuses {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 20px;
+  margin-top: 8px;
+  padding-top: 12px;
+  border-top: 1px solid var(--border-main);
+}
+
+.status-group {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.85rem;
+}
+
+.status-group label {
+  color: var(--text-muted);
+  font-weight: 500;
+}
+
+.status-select {
+  border: 1px solid var(--border-main);
+  border-radius: 6px;
+  padding: 4px 8px;
+  font-size: 0.85rem;
+  background-color: var(--bg-base);
+  color: var(--text-body);
+  cursor: pointer;
+  transition:
+    border-color 0.2s ease,
+    box-shadow 0.2s ease;
+}
+
+.status-select:focus {
+  outline: none;
+  border-color: var(--course-color, var(--brand-blue));
+  box-shadow: 0 0 0 4px var(--nav-active-bg);
+}
+
+.klms-badge {
+  padding: 4px 10px;
+  border-radius: 6px;
+  font-weight: 600;
+  text-transform: capitalize;
+  font-size: 0.8rem;
+}
+
+.klms-badge.submitted,
+.klms-badge.graded {
+  background: var(--success-bg);
+  color: var(--success-text);
+}
+
+.klms-badge.unsubmitted,
+.klms-badge.todo {
+  background: var(--danger-bg);
+  color: var(--danger-text);
+}
