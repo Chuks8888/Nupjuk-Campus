@@ -25,7 +25,7 @@ export async function sendVerificationCode(email) {
 }
 
 export async function signup({ email, password, code }) {
-  const user = await apiRequest('/auth/signup', {
+  const response = await apiRequest('/auth/signup', {
     method: 'POST',
     token: null,
     body: {
@@ -35,7 +35,10 @@ export async function signup({ email, password, code }) {
     },
   });
 
-  return normalizeUser(user);
+  return {
+    token: response.token,
+    user: normalizeUser(response.user),
+  };
 }
 
 export async function login({ email, password }) {
@@ -61,6 +64,15 @@ export async function getCurrentUser() {
 
 export function storeSession({ token, user }) {
   localStorage.setItem('authToken', token);
+
+  window.postMessage(
+    {
+      source: "NUPJUK_WEB",
+      type: "NUPJUK_AUTH_TOKEN",
+      token,
+    },
+    "*"
+  );
 
   if (user) {
     localStorage.setItem(CURRENT_USER_KEY, JSON.stringify(user));

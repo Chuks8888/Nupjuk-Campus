@@ -75,6 +75,16 @@ router.post("/signup", async (req, res) => {
       return res.status(400).json({ error: "Invalid or expired verification code" });
     }
 
+    const existingUser = await prisma.user.findUnique({
+      where: {
+        kaistEmail,
+      },
+    });
+
+    if (existingUser) {
+      return res.status(409).json({ error: "Email already registered" });
+    }
+
     const passwordHash = await bcrypt.hash(password, 10);
 
     const user = await prisma.user.create({
@@ -100,7 +110,22 @@ router.post("/signup", async (req, res) => {
       },
     });
 
-    return res.status(201).json(user);
+    const token = jwt.sign(
+      {
+        userId: user.id,
+        kaistEmail: user.kaistEmail,
+      },
+      process.env.JWT_SECRET!,
+      {
+        expiresIn: "7d",
+      }
+    );
+
+    return res.status(201).json({
+      token,
+      user,
+    });
+
   } catch (error) {
     console.error(error);
     return res.status(500).json({ error: "Signup failed" });

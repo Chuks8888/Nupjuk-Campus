@@ -152,16 +152,25 @@
 }
 
 /* Success UI wrapper */
-.success-container {
-  text-align: center;
-  padding: 2rem;
+.register-success-container {
+  position: fixed;
+  inset: 0;
+
   display: flex;
   flex-direction: column;
   align-items: center;
+  justify-content: center;
   gap: 1rem;
+
+  text-align: center;
+  background: var(--bg-color, #ffffff);
 }
 
-.success-container p {
+.register-success-container p {
   line-height: 1.5;
   color: var(--text-body);
+}
+
+.register-success-container .auth-link {
+  font-weight: bold;
 }

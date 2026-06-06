@@ -5,7 +5,7 @@ import { isValidKaistEmail } from '../utils/validator';
 import AuthForm from '../components/auth/AuthForm';
 import InputField from '../components/auth/InputField';
 import SubmitButton from '../components/auth/SubmitButton';
-import { sendVerificationCode, signup } from '../api/auth';
+import { sendVerificationCode, signup, storeSession } from '../api/auth';
 import '../styles/Login.css';
 
 export default function Register() {
@@ -45,7 +45,10 @@ export default function Register() {
 
       if (step === 'verify') {
         if (!code.trim()) throw new Error('Please enter the code.');
-        await signup({ email, password, code: code.trim() });
+
+        const session = await signup({ email, password, code: code.trim() });
+        storeSession(session);
+
         setStep('success');
       }
     } catch (err) {
@@ -58,9 +61,9 @@ export default function Register() {
   // If registration is successful, render the success UI
   if (step === 'success') {
     return (
-      <div className="login-container success-container">
+      <div className="register-success-container">
         <MailCheck size={64} color="var(--success-text, #34C759)" />
-        <h2>Check Your Inbox</h2>
+        <h2>Congratulations!</h2>
         <p>
           Your account for <strong>{email}</strong> has been created.
         </p>
