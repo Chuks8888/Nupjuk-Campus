@@ -16,13 +16,27 @@ export default function AssignmentCard({ assignment, onStatusChange }) {
     minute: '2-digit',
   });
 
+  const isCompleted = ['completed', 'done'].includes(userStatus);
+  const klmsStatus = assignment.klms_submission_status || 'not_submitted';
+  const klmsTimingStatus = assignment.klms_timing_status || 'on_time';
+
   useEffect(() => {
     const updateCountdown = () => {
+      if (klmsTimingStatus === 'overdue') {
+        setRemainingTime('Overdue');
+        return;
+      }
+
+      if (klmsTimingStatus === 'late_submitted') {
+        setRemainingTime('Submitted late');
+        return;
+      }
+
       const now = new Date();
       const diff = dueDate - now;
 
       if (diff <= 0) {
-        setRemainingTime('Overdue');
+        setRemainingTime('');
         return;
       }
 
@@ -43,7 +57,7 @@ export default function AssignmentCard({ assignment, onStatusChange }) {
     const timer = setInterval(updateCountdown, 60000);
 
     return () => clearInterval(timer);
-  }, [dueDate]);
+  }, [dueDate, klmsTimingStatus]);
 
   const handleStatusChange = async (e) => {
     const newStatus = e.target.value;
@@ -60,9 +74,6 @@ export default function AssignmentCard({ assignment, onStatusChange }) {
       }
     }
   };
-
-  const isCompleted = ['completed', 'done'].includes(userStatus);
-  const klmsStatus = assignment.klms_submission_status || 'unsubmitted';
 
   const toggleCompletion = () => {
     const newStatus = isCompleted ? 'todo' : 'completed';
@@ -96,7 +107,11 @@ export default function AssignmentCard({ assignment, onStatusChange }) {
           <span className="course-code" style={{ color: courseColor }}>
             {assignment.course_code}
           </span>
-          <span className={`countdown ${remainingTime === 'Overdue' ? 'overdue' : ''}`}>
+          <span
+            className={`countdown ${
+              remainingTime === 'Overdue' || remainingTime === 'Submitted late' ? 'overdue' : ''
+            }`}
+          >
             {remainingTime}
           </span>
         </div>

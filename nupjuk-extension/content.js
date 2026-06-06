@@ -203,6 +203,175 @@ if (window.location.hostname === "klms.kaist.ac.kr") {
   );
   console.table(parsedData.assignments);
 
+  function parseKlmsDate(dateText) {
+    if (!dateText) return null;
+
+    const parsedDate = new Date(dateText);
+
+    if (Number.isNaN(parsedDate.getTime())) {
+      return null;
+    }
+
+    return parsedDate.toISOString();
+  }
+
+  function parseAssignmentDetailStatusFromDoc(doc, fallbackText) {
+    let submissionStatusText = "";
+    let timeRemainingText = "";
+    let dueDateText = "";
+
+    const rows = [...doc.querySelectorAll("tr")];
+
+    for (const row of rows) {
+      const header = row.querySelector("th")?.innerText?.trim().toLowerCase();
+      const value = row.querySelector("td")?.innerText?.trim() || "";
+      const normalizedValue = value.toLowerCase();
+
+      if (header === "submission status") {
+        submissionStatusText = normalizedValue;
+      }
+
+      if (header === "time remaining") {
+        timeRemainingText = normalizedValue;
+      }
+
+      if (header === "due date") {
+        dueDateText = value;
+      }
+    }
+
+    const klmsSubmissionStatus =
+      submissionStatusText.includes("submitted for grading") ||
+      submissionStatusText === "submitted"
+        ? "submitted"
+        : "not_submitted";
+
+    let klmsTimingStatus = "on_time";
+
+    if (
+      timeRemainingText.includes("assignment is overdue") ||
+      timeRemainingText.includes("overdue by")
+    ) {
+      klmsTimingStatus = "overdue";
+    }
+
+    if (
+      timeRemainingText.includes("submitted") &&
+      timeRemainingText.includes("late")
+    ) {
+      klmsTimingStatus = "late_submitted";
+    }
+
+    const dueDate = parseKlmsDate(dueDateText);
+
+    console.log("Parsed KLMS fields:", {
+      submissionStatusText,
+      timeRemainingText,
+      dueDateText,
+      dueDate,
+      klmsSubmissionStatus,
+      klmsTimingStatus,
+    });
+
+    return {
+      klmsSubmissionStatus,
+      klmsTimingStatus,
+      dueDate,
+    };
+  }
+
+  async function fetchAssignmentDetailStatus(assignment) {
+    if (!assignment.assignmentUrl) {
+      return null;
+    }
+
+    try {
+      const res = await fetch(assignment.assignmentUrl, {
+        credentials: "include",
+      });
+
+      const html = await res.text();
+      const doc = new DOMParser().parseFromString(html, "text/html");
+      const text = doc.body?.innerText || "";
+
+      const parsedStatus = parseAssignmentDetailStatusFromDoc(doc, text);
+
+      return {
+        assignmentId: assignment.assignmentId,
+        klmsSubmissionStatus: parsedStatus.klmsSubmissionStatus,
+        klmsTimingStatus: parsedStatus.klmsTimingStatus,
+        dueDate: parsedStatus.dueDate,
+      };
+    } catch (error) {
+      console.error("Failed to fetch assignment detail:", assignment.title, error);
+
+      return {
+        assignmentId: assignment.assignmentId,
+        klmsSubmissionStatus: "not_submitted",
+        klmsTimingStatus: "on_time",
+        dueDate: null,
+      };
+    }
+  }
+
+  async function syncTrackedAssignmentStatuses(token) {
+    console.log("Fetching tracked assignments from backend");
+
+    const trackedRes = await fetch("http://localhost:3000/ingest/tracked-assignments", {
+      method: "GET",
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+
+    const trackedData = await trackedRes.json();
+
+    console.log("Tracked assignments response:", trackedRes.status, trackedData);
+    console.log("Tracked assignment count:", trackedData.assignments?.length);
+
+    if (!trackedRes.ok) {
+      console.error("Failed to fetch tracked assignments:", trackedData);
+      return;
+    }
+
+    const statuses = [];
+
+    for (const assignment of trackedData.assignments) {
+      console.log("Fetching detail for assignment:", assignment.title, assignment.assignmentUrl);
+
+      const status = await fetchAssignmentDetailStatus(assignment);
+
+      console.log("Parsed detail status:", status);
+
+      if (status) {
+        statuses.push(status);
+      }
+    }
+
+    if (statuses.length === 0) {
+      console.log("No tracked assignment statuses to update.");
+      return;
+    }
+
+    const updateRes = await fetch("http://localhost:3000/ingest/assignment-statuses", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify({ statuses }),
+    });
+
+    const updateData = await updateRes.json();
+
+    if (!updateRes.ok) {
+      console.error("Failed to update assignment statuses:", updateData);
+      return;
+    }
+
+    console.log("Assignment detail statuses updated:", updateData);
+  }
+
   async function syncToBackend(parsedData) {
 
     const { token } = await chrome.storage.local.get(["token"]);
@@ -250,21 +419,28 @@ if (window.location.hostname === "klms.kaist.ac.kr") {
     }
 
     if (parsedData.assignments.length > 0) {
-    fetch("http://localhost:3000/ingest/assignments", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${token}`,
-      },
-      body: JSON.stringify({
-        semester: parsedData.semester,
-        assignments: parsedData.assignments,
-      }),
-    })
-      .then((res) => res.json())
-      .then((data) => console.log("Assignment ingest success:", data))
-      .catch((err) => console.error("Assignment ingest failed:", err));
+      try {
+        const assignmentRes = await fetch("http://localhost:3000/ingest/assignments", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+          body: JSON.stringify({
+            semester: parsedData.semester,
+            assignments: parsedData.assignments,
+          }),
+        });
+
+        const assignmentData = await assignmentRes.json();
+        console.log("Assignment ingest success:", assignmentData);
+      } catch (err) {
+        console.error("Assignment ingest failed:", err);
+      }
     }
+
+    console.log("About to sync tracked assignment statuses");
+    await syncTrackedAssignmentStatuses(token);
   }
 
   syncToBackend(parsedData);
