@@ -116,6 +116,50 @@ router.get('/course/:courseId', authenticateToken, async (req: AuthRequest, res:
     }
 });
 
+
+// ==========================================
+// 2.5 GET /meetings/:id
+// Fetch details of a specific meeting event
+// ==========================================
+router.get('/:id', authenticateToken, async (req: AuthRequest, res: Response): Promise<any> => {
+    try {
+        const meetingEventId = parseInt(req.params.id as string);
+
+        if (isNaN(meetingEventId)) {
+            return res.status(400).json({ error: 'Invalid meeting ID format.' });
+        }
+
+        const meeting = await prisma.meetingEvent.findUnique({
+            where: { id: meetingEventId },
+            include: {
+                creator: {
+                    select: { id: true, displayName: true, kaistEmail: true }
+                },
+                participants: {
+                    include: {
+                        user: { select: { id: true, displayName: true, kaistEmail: true } }
+                    }
+                },
+                availabilities: {
+                    include: {
+                        user: { select: { id: true, displayName: true, kaistEmail: true } }
+                    }
+                }
+            }
+        });
+
+        if (!meeting) {
+            return res.status(404).json({ error: 'Meeting not found.' });
+        }
+
+        return res.status(200).json(meeting);
+    } catch (error) {
+        console.error('Error fetching meeting details:', error);
+        return res.status(500).json({ error: 'Failed to fetch meeting details.' });
+    }
+});
+
+
 // ==========================================
 // 3. POST /meetings/:id/availability
 // Submit or update personal availability slots for a meeting poll
