@@ -2,8 +2,8 @@ import { Router, Response } from "express";
 import multer from "multer";
 import path from "path";
 import fs from "fs";
-import { prisma } from "../db";
-import { authenticateToken, AuthRequest } from "../middleware/auth";
+import { prisma } from "../src/db";
+import { authenticateToken, AuthRequest } from "../src/middleware/auth";
 
 const router = Router();
 

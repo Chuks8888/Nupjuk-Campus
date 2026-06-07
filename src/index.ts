@@ -5,14 +5,14 @@ import authRouter from "./routes/auth";
 import meRouter from "./routes/me";
 import ingestRouter from "./routes/ingest";
 import personalEventsRouter from "./routes/personalEvents";
-import calendarRouter from "./routes/calendar";
-import boardsRouter from "./routes/boards";
-import commentsRouter from "./routes/comments";
+import calendarRouter from "../old-routes/calendar";
+import boardsRouter from "../old-routes/boards";
+import commentsRouter from "../old-routes/comments";
 import coursesRouter from "./routes/courses";
 import meetingsRouter from "./routes/meetings";
 import notificationsRouter from "./routes/notifications";
 import path from "path";
-import attachmentsRouter from "./routes/attachments";
+import attachmentsRouter from "../old-routes/attachments";
 import { cleanupExpiredAttachments } from "./jobs/cleanupExpiredAttachments";
 import { setupRealtime } from "./realtime";
 

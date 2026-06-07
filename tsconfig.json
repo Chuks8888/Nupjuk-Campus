@@ -14,6 +14,6 @@
 
     "verbatimModuleSyntax": false
   },
-  "include": ["src/**/*.ts"],
+  "include": ["src/**/*.ts", "old-routes/attachments.ts", "old-routes/boards.ts", "old-routes/calendar.ts", "old-routes/comments.ts", "old-routes/coursePosts.ts"],
   "exclude": ["node_modules", "dist"]
 }

@@ -159,7 +159,7 @@ model PersonalEvent {
   id          Int      @id @default(autoincrement())
   userId      Int
   title       String
-  startTime   DateTime
+  startTime   DateTime?
   endTime     DateTime
   description String?
   status      String   @default("todo")
