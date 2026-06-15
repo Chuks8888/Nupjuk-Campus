@@ -83,7 +83,9 @@ function normalizeMeeting(meeting) {
     time_range_end: meeting.timeRangeEnd,
     creator_name: meeting.creator?.displayName || meeting.creator?.kaistEmail || 'Unknown',
     participant_count: meeting.participants?.length ?? 0,
-    my_available_slots: (meeting.myAvailableSlots || []).map((slot) => new Date(slot).toISOString()),
+    my_available_slots: (meeting.myAvailableSlots || []).map((slot) =>
+      new Date(slot).toISOString()
+    ),
     participants:
       meeting.participants?.map((participant) => ({
         id: String(participant.userId ?? participant.user?.id ?? participant.id),
@@ -154,7 +156,7 @@ export async function createCourseMeeting(courseId, meeting) {
 
 export async function saveMeetingAvailability(meetingId, availableSlots) {
   return await apiRequest(`/meetings/${meetingId}/availability`, {
-    method: 'PUT',
+    method: 'POST',
     body: { availableSlots },
   });
 }
