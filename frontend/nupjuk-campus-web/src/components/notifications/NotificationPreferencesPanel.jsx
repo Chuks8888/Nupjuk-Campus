@@ -1,7 +1,7 @@
 const DEADLINE_TIMINGS = [
   { value: '1h', label: '1 hour' },
-  { value: '24h', label: '24 hours' },
-  { value: '72h', label: '3 days' },
+  { value: '1d', label: '24 hours' },
+  { value: '3d', label: '3 days' },
 ];
 
 const PREFERENCE_FIELDS = [

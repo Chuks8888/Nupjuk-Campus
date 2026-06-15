@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { CheckCheck, SlidersHorizontal } from 'lucide-react';
 import NotificationList from '../components/notifications/NotificationList';
 import NotificationPreferencesPanel from '../components/notifications/NotificationPreferencesPanel';
@@ -16,6 +16,8 @@ const NOTIFICATION_LIMIT = 30;
 export default function Alerts() {
   const [notifications, setNotifications] = useState([]);
   const [preferences, setPreferences] = useState([]);
+  const [paginationMeta, setPaginationMeta] = useState(null);
+  const [unreadCount, setUnreadCount] = useState(0);
   const [showUnreadOnly, setShowUnreadOnly] = useState(false);
   const [activePanel, setActivePanel] = useState('notifications');
   const [isLoading, setIsLoading] = useState(true);
@@ -37,6 +39,11 @@ export default function Alerts() {
         ]);
 
         setNotifications(notificationData.data);
+        if (notificationData.meta) {
+          setUnreadCount(notificationData.meta.unreadCount);
+          setPaginationMeta(notificationData.meta);
+        }
+
         setPreferences(preferenceData);
       } catch (err) {
         setError(err.message || 'Failed to load alerts.');
@@ -48,14 +55,10 @@ export default function Alerts() {
     loadAlerts();
   }, [showUnreadOnly]);
 
-  const unreadCount = useMemo(
-    () => notifications.filter((notification) => !notification.is_read).length,
-    [notifications]
-  );
-
   const handleNotificationRead = async (notificationId) => {
     const target = notifications.find((notification) => notification.id === notificationId);
     if (!target || target.is_read) return;
+
     const previousNotifications = notifications;
 
     setNotifications((current) =>
@@ -66,28 +69,40 @@ export default function Alerts() {
           )
     );
 
+    setUnreadCount((prev) => Math.max(0, prev - 1));
+
     try {
       await markNotificationAsRead(target.raw_id);
       window.dispatchEvent(new Event('notifications:updated'));
     } catch (err) {
       setNotifications(previousNotifications);
+      setUnreadCount((prev) => prev + 1);
       setError(err.message || 'Failed to mark notification as read.');
     }
   };
 
   const handleMarkAllAsRead = async () => {
     const previousNotifications = notifications;
+    const previousUnreadCount = unreadCount;
 
     try {
       setIsMarkingAll(true);
       setError('');
+
       setNotifications((current) =>
         current.map((notification) => ({ ...notification, is_read: true }))
       );
+      setUnreadCount(0);
+
       await markAllNotificationsAsRead();
       window.dispatchEvent(new Event('notifications:updated'));
+
+      if (showUnreadOnly) {
+        setNotifications([]);
+      }
     } catch (err) {
       setNotifications(previousNotifications);
+      setUnreadCount(previousUnreadCount);
       setError(err.message || 'Failed to mark notifications as read.');
     } finally {
       setIsMarkingAll(false);
@@ -103,9 +118,7 @@ export default function Alerts() {
     setPreferencesError('');
     setSavingPreferenceId(preferenceId);
     setPreferences((current) =>
-      current.map((preference) =>
-        preference.id === preferenceId ? updatedPreference : preference
-      )
+      current.map((preference) => (preference.id === preferenceId ? updatedPreference : preference))
     );
 
     try {
@@ -140,19 +153,21 @@ export default function Alerts() {
       deadline_reminder_timing: ['24h'],
       course: null,
     };
-    const previousPreferences = preferences;
 
     setPreferencesError('');
     setSavingPreferenceId(temporaryPreference.id);
-    setPreferences([temporaryPreference]);
+
+    setPreferences((current) => [...current, temporaryPreference]);
 
     try {
       const response = await updateNotificationPreferences(temporaryPreference);
       if (response.preferences) {
-        setPreferences([response.preferences]);
+        setPreferences((current) =>
+          current.map((p) => (p.id === temporaryPreference.id ? response.preferences : p))
+        );
       }
     } catch (err) {
-      setPreferences(previousPreferences);
+      setPreferences((current) => current.filter((p) => p.id !== temporaryPreference.id));
       setPreferencesError(err.message || 'Failed to create preferences.');
     } finally {
       setSavingPreferenceId('');
