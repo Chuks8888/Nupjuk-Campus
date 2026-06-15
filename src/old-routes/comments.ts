@@ -1,6 +1,6 @@
 import { Router, Response } from "express";
-import { prisma } from "../src/db";
-import { authenticateToken, AuthRequest } from "../src/middleware/auth";
+import { prisma } from "../db";
+import { authenticateToken, AuthRequest } from "../middleware/auth";
 
 const router = Router();
 
@@ -50,7 +50,7 @@ router.post("/posts/:postId", async (req: AuthRequest, res: Response) => {
     const hasAccess = await canAccessPost(authorId, postId);
 
     if (!hasAccess) {
-    return res.status(403).json({ error: "No access to this post" });
+      return res.status(403).json({ error: "No access to this post" });
     }
 
     const comment = await prisma.comment.create({

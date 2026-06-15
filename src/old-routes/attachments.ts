@@ -2,8 +2,8 @@ import { Router, Response } from "express";
 import multer from "multer";
 import path from "path";
 import fs from "fs";
-import { prisma } from "../src/db";
-import { authenticateToken, AuthRequest } from "../src/middleware/auth";
+import { prisma } from "../db";
+import { authenticateToken, AuthRequest } from "../middleware/auth";
 
 const router = Router();
 
@@ -52,9 +52,7 @@ const upload = multer({
     fileSize: 15 * 1024 * 1024,
   },
   fileFilter: (_req, file, cb) => {
-    const ext = path.extname(file.originalname)
-      .replace(".", "")
-      .toLowerCase();
+    const ext = path.extname(file.originalname).replace(".", "").toLowerCase();
 
     if (!allowedExtensions.includes(ext)) {
       return cb(new Error("Invalid file type"));
@@ -118,7 +116,9 @@ router.post(
       }
 
       const fileUrl = `/uploads/${req.file.filename}`;
-      const fileExtension = path.extname(req.file.originalname).replace(".", "");
+      const fileExtension = path
+        .extname(req.file.originalname)
+        .replace(".", "");
 
       const attachment = await prisma.attachment.create({
         data: {
@@ -128,9 +128,7 @@ router.post(
           fileSize: req.file.size,
           fileExtension,
           storageBackend: "server",
-          expiresAt: new Date(
-            Date.now() + 1000 * 60 * 60 * 24 * 30
-          ),
+          expiresAt: new Date(Date.now() + 1000 * 60 * 60 * 24 * 30),
         },
       });
 
@@ -139,7 +137,7 @@ router.post(
       console.error("Failed to upload attachment:", error);
       return res.status(500).json({ error: "Failed to upload attachment" });
     }
-  }
+  },
 );
 
 // GET /attachments/posts/:postId

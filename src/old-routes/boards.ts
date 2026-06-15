@@ -1,6 +1,6 @@
 import { Router, Response } from "express";
-import { prisma } from "../src/db";
-import { authenticateToken, AuthRequest } from "../src/middleware/auth";
+import { prisma } from "../db";
+import { authenticateToken, AuthRequest } from "../middleware/auth";
 
 const router = Router();
 
@@ -112,7 +112,7 @@ router.post("/:boardId/posts", async (req: AuthRequest, res: Response) => {
       "QUESTION",
       "ASSIGNMENT",
       "EXAM",
-      "PROJECT"
+      "PROJECT",
     ];
 
     if (category && !allowedCategories.includes(category)) {
@@ -162,7 +162,7 @@ router.get("/posts/:postId", async (req: AuthRequest, res: Response) => {
           select: {
             id: true,
             kaistEmail: true,
-              displayName: true,
+            displayName: true,
           },
         },
         comments: {
@@ -217,7 +217,7 @@ router.patch("/posts/:postId", async (req: AuthRequest, res: Response) => {
       "QUESTION",
       "ASSIGNMENT",
       "EXAM",
-      "PROJECT"
+      "PROJECT",
     ];
 
     if (category && !allowedCategories.includes(category)) {

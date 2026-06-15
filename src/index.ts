@@ -5,14 +5,14 @@ import authRouter from "./routes/auth";
 import meRouter from "./routes/me";
 import ingestRouter from "./routes/ingest";
 import personalEventsRouter from "./routes/personalEvents";
-import calendarRouter from "../old-routes/calendar";
-import boardsRouter from "../old-routes/boards";
-import commentsRouter from "../old-routes/comments";
+import calendarRouter from "./old-routes/calendar";
+import boardsRouter from "./old-routes/boards";
+import commentsRouter from "./old-routes/comments";
 import coursesRouter from "./routes/courses";
 import meetingsRouter from "./routes/meetings";
 import notificationsRouter from "./routes/notifications";
 import path from "path";
-import attachmentsRouter from "../old-routes/attachments";
+import attachmentsRouter from "./old-routes/attachments";
 import { cleanupExpiredAttachments } from "./jobs/cleanupExpiredAttachments";
 import { setupRealtime } from "./realtime";
 
@@ -39,9 +39,12 @@ app.use("/comments", commentsRouter);
 app.use("/uploads", express.static(path.join(process.cwd(), "uploads")));
 app.use("/attachments", attachmentsRouter);
 
-setInterval(() => {
-  cleanupExpiredAttachments();
-}, 1000 * 60 * 60);
+setInterval(
+  () => {
+    cleanupExpiredAttachments();
+  },
+  1000 * 60 * 60,
+);
 
 const PORT = Number(process.env.PORT) || 3000;
 
