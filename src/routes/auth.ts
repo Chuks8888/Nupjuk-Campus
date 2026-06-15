@@ -72,7 +72,9 @@ router.post("/signup", async (req, res) => {
     });
 
     if (!verification) {
-      return res.status(400).json({ error: "Invalid or expired verification code" });
+      return res
+        .status(400)
+        .json({ error: "Invalid or expired verification code" });
     }
 
     const existingUser = await prisma.user.findUnique({
@@ -118,14 +120,13 @@ router.post("/signup", async (req, res) => {
       process.env.JWT_SECRET!,
       {
         expiresIn: "7d",
-      }
+      },
     );
 
     return res.status(201).json({
       token,
       user,
     });
-
   } catch (error) {
     console.error(error);
     return res.status(500).json({ error: "Signup failed" });
@@ -155,26 +156,26 @@ router.post("/login", async (req, res) => {
     }
 
     const token = jwt.sign(
-    {
+      {
         userId: user.id,
         kaistEmail: user.kaistEmail,
-    },
-    process.env.JWT_SECRET!,
-    {
+      },
+      process.env.JWT_SECRET!,
+      {
         expiresIn: "7d",
-    }
+      },
     );
 
     return res.json({
-    token,
+      token,
 
-    user: {
+      user: {
         id: user.id,
         studentId: user.studentId,
         kaistEmail: user.kaistEmail,
         displayName: user.displayName,
         createdAt: user.createdAt,
-    },
+      },
     });
   } catch (error) {
     console.error(error);

@@ -148,293 +148,309 @@ router.post("/courses", authenticateToken, async (req: AuthRequest, res) => {
 // Missing from KLMS to-do list: unknown; do not mark as submitted automatically.
 // KLMS may hide overdue assignments from the homepage to-do list.
 
-router.post("/assignments", authenticateToken, async (req: AuthRequest, res) => {
-  try {
-    const { assignments, semester } = req.body;
-    const userId = req.user!.userId;
+router.post(
+  "/assignments",
+  authenticateToken,
+  async (req: AuthRequest, res) => {
+    try {
+      const { assignments, semester } = req.body;
+      const userId = req.user!.userId;
 
-    if (!assignments || !Array.isArray(assignments)) {
-      return res.status(400).json({ error: "Invalid assignments data" });
-    }
-
-    if (assignments.length === 0) {
-      return res.json({
-        message: "No assignments found; skipped assignment status update",
-      });
-    }
-
-    const seenAssignmentIdsByCourse = new Map<number, number[]>();
-    const touchedCourseIds = new Set<number>();
-
-    for (const assignment of assignments) {
-      console.log("assignment courseName:", assignment.courseName);
-      console.log("semester:", semester);
-      console.log("before course find");
-      const course = await prisma.course.findFirst({
-        where: {
-          courseName: assignment.courseName,
-          semester,
-        },
-      });
-
-      if (!course) {
-        continue;
+      if (!assignments || !Array.isArray(assignments)) {
+        return res.status(400).json({ error: "Invalid assignments data" });
       }
 
-      touchedCourseIds.add(course.id);
-
-      const klmsAssignmentId =
-        assignment.klmsAssignmentId ||
-        assignment.assignmentUrl?.match(/[?&]id=([^&]+)/)?.[1] ||
-        assignment.assignmentUrl;
-
-      if (!klmsAssignmentId || !assignment.assignmentUrl) {
-        continue;
+      if (assignments.length === 0) {
+        return res.json({
+          message: "No assignments found; skipped assignment status update",
+        });
       }
 
-      console.log("before assignment write");
-      console.log("assignment payload:", assignment);
+      const seenAssignmentIdsByCourse = new Map<number, number[]>();
+      const touchedCourseIds = new Set<number>();
 
-      const existingAssignment = await prisma.assignment.findUnique({
-        where: {
-          assignmentUrl: assignment.assignmentUrl,
-        },
-      });
-
-      const normalizedDueDate = assignment.dueDate
-        ? new Date(`${assignment.dueDate}T23:59:00+09:00`)
-        : null;
-
-      let dbAssignment = existingAssignment;
-
-      if (!dbAssignment) {
-        console.log("creating new assignment");
-
-        dbAssignment = await prisma.assignment.create({
-          data: {
-            courseId: course.id,
-            klmsAssignmentId,
-            title: assignment.title,
-            dueDate: normalizedDueDate,
-            description: assignment.description || null,
-            assignmentUrl: assignment.assignmentUrl,
-            source: assignment.source || "klms_synced",
+      for (const assignment of assignments) {
+        console.log("assignment courseName:", assignment.courseName);
+        console.log("semester:", semester);
+        console.log("before course find");
+        const course = await prisma.course.findFirst({
+          where: {
+            courseName: assignment.courseName,
+            semester,
           },
         });
-      } else {
-        console.log("assignment already exists");
-      }
 
-      if (!seenAssignmentIdsByCourse.has(course.id)) {
-        seenAssignmentIdsByCourse.set(course.id, []);
-      }
+        if (!course) {
+          continue;
+        }
 
-      seenAssignmentIdsByCourse.get(course.id)!.push(dbAssignment.id);
+        touchedCourseIds.add(course.id);
 
-      console.log("before status upsert");
+        const klmsAssignmentId =
+          assignment.klmsAssignmentId ||
+          assignment.assignmentUrl?.match(/[?&]id=([^&]+)/)?.[1] ||
+          assignment.assignmentUrl;
 
-      await prisma.userAssignmentStatus.upsert({
-        where: {
-          userId_assignmentId: {
+        if (!klmsAssignmentId || !assignment.assignmentUrl) {
+          continue;
+        }
+
+        console.log("before assignment write");
+        console.log("assignment payload:", assignment);
+
+        const existingAssignment = await prisma.assignment.findUnique({
+          where: {
+            assignmentUrl: assignment.assignmentUrl,
+          },
+        });
+
+        const normalizedDueDate = assignment.dueDate
+          ? new Date(`${assignment.dueDate}T23:59:00+09:00`)
+          : null;
+
+        let dbAssignment = existingAssignment;
+
+        if (!dbAssignment) {
+          console.log("creating new assignment");
+
+          dbAssignment = await prisma.assignment.create({
+            data: {
+              courseId: course.id,
+              klmsAssignmentId,
+              title: assignment.title,
+              dueDate: normalizedDueDate,
+              description: assignment.description || null,
+              assignmentUrl: assignment.assignmentUrl,
+              source: assignment.source || "klms_synced",
+            },
+          });
+        } else {
+          console.log("assignment already exists");
+        }
+
+        if (!seenAssignmentIdsByCourse.has(course.id)) {
+          seenAssignmentIdsByCourse.set(course.id, []);
+        }
+
+        seenAssignmentIdsByCourse.get(course.id)!.push(dbAssignment.id);
+
+        console.log("before status upsert");
+
+        await prisma.userAssignmentStatus.upsert({
+          where: {
+            userId_assignmentId: {
+              userId,
+              assignmentId: dbAssignment.id,
+            },
+          },
+          update: {
+            klmsSubmissionStatus: "not_submitted",
+          },
+          create: {
             userId,
             assignmentId: dbAssignment.id,
+            klmsSubmissionStatus: "not_submitted",
           },
-        },
-        update: {
-          klmsSubmissionStatus: "not_submitted",
-        },
-        create: {
-          userId,
-          assignmentId: dbAssignment.id,
-          klmsSubmissionStatus: "not_submitted",
-        },
+        });
+      }
+
+      // console.log("before missing status update");
+
+      // const activeEnrollments = await prisma.enrollment.findMany({
+      //   where: {
+      //     userId,
+      //     status: "active",
+      //   },
+      //   select: {
+      //     courseId: true,
+      //   },
+      // });
+
+      // for (const enrollment of activeEnrollments) {
+      //   const courseId = enrollment.courseId;
+      //   const seenAssignmentIds = seenAssignmentIdsByCourse.get(courseId) || [];
+
+      //   const oldNotSubmittedStatuses = await prisma.userAssignmentStatus.findMany({
+      //     where: {
+      //       userId,
+      //       klmsSubmissionStatus: "not_submitted",
+      //       assignment: {
+      //         courseId,
+      //       },
+      //     },
+      //     select: {
+      //       id: true,
+      //       assignmentId: true,
+      //     },
+      //   });
+
+      //   for (const status of oldNotSubmittedStatuses) {
+      //     if (seenAssignmentIds.includes(status.assignmentId)) {
+      //       continue;
+      //     }
+
+      //     await prisma.userAssignmentStatus.update({
+      //       where: {
+      //         id: status.id,
+      //       },
+      //       data: {
+      //         klmsSubmissionStatus: "submitted",
+      //       },
+      //     });
+      //   }
+      // }
+
+      console.log("skipping missing assignment status update");
+
+      return res.json({
+        message: "Assignments ingested successfully",
+        touchedCourseCount: touchedCourseIds.size,
       });
+    } catch (error) {
+      console.error(error);
+      return res.status(500).json({ error: "Failed to ingest assignments" });
     }
+  },
+);
 
-    // console.log("before missing status update");
+router.get(
+  "/tracked-assignments",
+  authenticateToken,
+  async (req: AuthRequest, res) => {
+    try {
+      const userId = req.user!.userId;
 
-    // const activeEnrollments = await prisma.enrollment.findMany({
-    //   where: {
-    //     userId,
-    //     status: "active",
-    //   },
-    //   select: {
-    //     courseId: true,
-    //   },
-    // });
-
-    // for (const enrollment of activeEnrollments) {
-    //   const courseId = enrollment.courseId;
-    //   const seenAssignmentIds = seenAssignmentIdsByCourse.get(courseId) || [];
-
-    //   const oldNotSubmittedStatuses = await prisma.userAssignmentStatus.findMany({
-    //     where: {
-    //       userId,
-    //       klmsSubmissionStatus: "not_submitted",
-    //       assignment: {
-    //         courseId,
-    //       },
-    //     },
-    //     select: {
-    //       id: true,
-    //       assignmentId: true,
-    //     },
-    //   });
-
-    //   for (const status of oldNotSubmittedStatuses) {
-    //     if (seenAssignmentIds.includes(status.assignmentId)) {
-    //       continue;
-    //     }
-
-    //     await prisma.userAssignmentStatus.update({
-    //       where: {
-    //         id: status.id,
-    //       },
-    //       data: {
-    //         klmsSubmissionStatus: "submitted",
-    //       },
-    //     });
-    //   }
-    // }
-
-    console.log("skipping missing assignment status update");
-
-    return res.json({
-      message: "Assignments ingested successfully",
-      touchedCourseCount: touchedCourseIds.size,
-    });
-  } catch (error) {
-    console.error(error);
-    return res.status(500).json({ error: "Failed to ingest assignments" });
-  }
-});
-
-router.get("/tracked-assignments", authenticateToken, async (req: AuthRequest, res) => {
-  try {
-    const userId = req.user!.userId;
-
-    const assignments = await prisma.assignment.findMany({
-      where: {
-        source: "klms_synced",
-        course: {
-          enrollments: {
-            some: {
-              userId,
-              status: "active",
+      const assignments = await prisma.assignment.findMany({
+        where: {
+          source: "klms_synced",
+          course: {
+            enrollments: {
+              some: {
+                userId,
+                status: "active",
+              },
             },
           },
         },
-      },
-      include: {
-        course: true,
-        userStatuses: {
-          where: {
-            userId,
+        include: {
+          course: true,
+          userStatuses: {
+            where: {
+              userId,
+            },
           },
         },
-      },
-    });
+      });
 
-    return res.json({
-      assignments: assignments.map((assignment: any) => ({
-        assignmentId: assignment.id,
-        title: assignment.title,
-        assignmentUrl: assignment.assignmentUrl,
-        dueDate: assignment.dueDate,
-        courseName: assignment.course.courseName,
-        semester: assignment.course.semester,
-        klmsSubmissionStatus:
-          assignment.userStatuses[0]?.klmsSubmissionStatus ?? "not_submitted",
-        klmsTimingStatus:
-          assignment.userStatuses[0]?.klmsTimingStatus ?? "on_time",
-      })),
-    });
-  } catch (error) {
-    console.error(error);
-    return res.status(500).json({ error: "Failed to fetch tracked assignments" });
-  }
-});
-
-router.post("/assignment-statuses", authenticateToken, async (req: AuthRequest, res) => {
-  try {
-    const userId = req.user!.userId;
-    const { statuses } = req.body;
-
-    if (!Array.isArray(statuses)) {
-      return res.status(400).json({ error: "Invalid statuses data" });
+      return res.json({
+        assignments: assignments.map((assignment: any) => ({
+          assignmentId: assignment.id,
+          title: assignment.title,
+          assignmentUrl: assignment.assignmentUrl,
+          dueDate: assignment.dueDate,
+          courseName: assignment.course.courseName,
+          semester: assignment.course.semester,
+          klmsSubmissionStatus:
+            assignment.userStatuses[0]?.klmsSubmissionStatus ?? "not_submitted",
+          klmsTimingStatus:
+            assignment.userStatuses[0]?.klmsTimingStatus ?? "on_time",
+        })),
+      });
+    } catch (error) {
+      console.error(error);
+      return res
+        .status(500)
+        .json({ error: "Failed to fetch tracked assignments" });
     }
+  },
+);
 
-    const allowedSubmissionStatuses = ["not_submitted", "submitted"];
-    const allowedTimingStatuses = ["on_time", "overdue", "late_submitted"];
+router.post(
+  "/assignment-statuses",
+  authenticateToken,
+  async (req: AuthRequest, res) => {
+    try {
+      const userId = req.user!.userId;
+      const { statuses } = req.body;
 
-    const updated = [];
-
-    for (const status of statuses) {
-      const {
-        assignmentId,
-        klmsSubmissionStatus,
-        klmsTimingStatus = "on_time",
-        dueDate,
-      } = status;
-
-      if (!assignmentId || !klmsSubmissionStatus) {
-        continue;
+      if (!Array.isArray(statuses)) {
+        return res.status(400).json({ error: "Invalid statuses data" });
       }
 
-      if (!allowedSubmissionStatuses.includes(klmsSubmissionStatus)) {
-        continue;
-      }
+      const allowedSubmissionStatuses = ["not_submitted", "submitted"];
+      const allowedTimingStatuses = ["on_time", "overdue", "late_submitted"];
 
-      if (!allowedTimingStatuses.includes(klmsTimingStatus)) {
-        continue;
-      }
+      const updated = [];
 
-      const updatedStatus = await prisma.userAssignmentStatus.upsert({
-        where: {
-          userId_assignmentId: {
+      for (const status of statuses) {
+        const {
+          assignmentId,
+          klmsSubmissionStatus,
+          klmsTimingStatus = "on_time",
+          dueDate,
+        } = status;
+
+        if (!assignmentId || !klmsSubmissionStatus) {
+          continue;
+        }
+
+        if (!allowedSubmissionStatuses.includes(klmsSubmissionStatus)) {
+          continue;
+        }
+
+        if (!allowedTimingStatuses.includes(klmsTimingStatus)) {
+          continue;
+        }
+
+        const updatedStatus = await prisma.userAssignmentStatus.upsert({
+          where: {
+            userId_assignmentId: {
+              userId,
+              assignmentId,
+            },
+          },
+          update: {
+            klmsSubmissionStatus,
+            klmsTimingStatus,
+          },
+          create: {
             userId,
             assignmentId,
+            klmsSubmissionStatus,
+            klmsTimingStatus,
           },
-        },
-        update: {
-          klmsSubmissionStatus,
-          klmsTimingStatus,
-        },
-        create: {
-          userId,
+        });
+
+        if (dueDate) {
+          await prisma.assignment.update({
+            where: {
+              id: assignmentId,
+            },
+            data: {
+              dueDate: new Date(dueDate),
+            },
+          });
+        }
+
+        updated.push({
           assignmentId,
           klmsSubmissionStatus,
           klmsTimingStatus,
-        },
-      });
-
-      if (dueDate) {
-        await prisma.assignment.update({
-          where: {
-            id: assignmentId,
-          },
-          data: {
-            dueDate: new Date(dueDate),
-          },
+          statusId: updatedStatus.id,
         });
       }
 
-      updated.push({
-        assignmentId,
-        klmsSubmissionStatus,
-        klmsTimingStatus,
-        statusId: updatedStatus.id,
+      return res.json({
+        message: "Assignment statuses updated successfully",
+        updated,
       });
+    } catch (error) {
+      console.error(error);
+      return res
+        .status(500)
+        .json({ error: "Failed to update assignment statuses" });
     }
-
-    return res.json({
-      message: "Assignment statuses updated successfully",
-      updated,
-    });
-  } catch (error) {
-    console.error(error);
-    return res.status(500).json({ error: "Failed to update assignment statuses" });
-  }
-});
+  },
+);
 
 export default router;
