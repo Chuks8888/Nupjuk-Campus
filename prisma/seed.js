@@ -95,24 +95,6 @@ async function upsertMeetingEvent(data) {
   return prisma.meetingEvent.create({ data });
 }
 
-async function upsertNotificationPreference(data) {
-  const existing = await prisma.notificationPreference.findFirst({
-    where: {
-      userId: data.userId,
-      courseId: data.courseId,
-    },
-  });
-
-  if (existing) {
-    return prisma.notificationPreference.update({
-      where: { id: existing.id },
-      data,
-    });
-  }
-
-  return prisma.notificationPreference.create({ data });
-}
-
 async function upsertNotification(data) {
   const existing = await prisma.notification.findFirst({
     where: {
@@ -188,7 +170,7 @@ async function main() {
   const courseSeeds = [
     {
       courseCode: "CS350",
-      courseName: "Introduction to Engineering",
+      courseName: "Introduction to Engineer Software",
       semester: "2026 Spring",
       klmsCourseId: "klms-cs350-2026s",
     },
@@ -200,19 +182,19 @@ async function main() {
     },
     {
       courseCode: "CS330",
-      courseName: "Operating Systems and Lab",
+      courseName: "Lab and Operating Systems",
       semester: "2026 Spring",
       klmsCourseId: "klms-cs330-2026s",
     },
     {
       courseCode: "MAS275",
-      courseName: "Discrete Mathematics",
+      courseName: "Mathematics Discrete",
       semester: "2026 Spring",
       klmsCourseId: "klms-mas275-2026s",
     },
     {
       courseCode: "HSS101",
-      courseName: "Academic Writing",
+      courseName: "Writing Academic",
       semester: "2026 Spring",
       klmsCourseId: "klms-hss101-2026s",
     },
@@ -346,6 +328,35 @@ async function main() {
       "Leave review comments for two classmates.",
       "hss101-peer-review",
     ],
+
+    [
+      "CS350",
+      "TESTING: Alert in 15 mins (3h reminder)",
+      "2026-06-16T04:29:00+09:00",
+      "Triggers the 3-hour alert exactly 15 minutes from 1:14 AM.",
+      "cs350-test-15m-alert",
+    ],
+    [
+      "CS374",
+      "TESTING: Alert in 20 mins (24h reminder)",
+      "2026-06-17T01:34:00+09:00",
+      "Triggers the 24-hour alert exactly 20 minutes from 1:14 AM.",
+      "cs374-test-20m-alert",
+    ],
+    [
+      "CS330",
+      "TESTING: Alert in 25 mins (3h reminder)",
+      "2026-06-16T04:39:00+09:00",
+      "Triggers the 3-hour alert exactly 25 minutes from 1:14 AM.",
+      "cs330-test-25m-alert",
+    ],
+    [
+      "MAS275",
+      "TESTING: Alert in 30 mins (24h reminder)",
+      "2026-06-17T01:44:00+09:00",
+      "Triggers the 24-hour alert exactly 30 minutes from 1:14 AM.",
+      "mas275-test-30m-alert",
+    ],
   ];
 
   const assignments = {};
@@ -391,6 +402,11 @@ async function main() {
     ["mas275-corrections", "not_submitted", "todo"],
     ["hss101-draft", "not_submitted", "in_progress"],
     ["hss101-peer-review", "not_submitted", "todo"],
+
+    ["cs350-test-15m-alert", "not_submitted", "todo"],
+    ["cs374-test-20m-alert", "not_submitted", "todo"],
+    ["cs330-test-25m-alert", "not_submitted", "todo"],
+    ["mas275-test-30m-alert", "not_submitted", "todo"],
   ];
 
   for (const [
@@ -664,18 +680,6 @@ async function main() {
           "2026-05-24T20:00:00+09:00",
         ],
       },
-    });
-  }
-
-  for (const course of Object.values(courses)) {
-    await upsertNotificationPreference({
-      userId: demo.id,
-      courseId: course.id,
-      postCommentEnabled: true,
-      deadlineEnabled: true,
-      meetingEnabled: true,
-      emailEnabled: false,
-      deadlineReminderTiming: ["24h", "3h"],
     });
   }
 

@@ -150,7 +150,7 @@ export default function Alerts() {
       deadline_enabled: true,
       meeting_enabled: true,
       email_enabled: false,
-      deadline_reminder_timing: ['24h'],
+      deadline_reminder_timing: ['24h', '3h'],
       course: null,
     };
 

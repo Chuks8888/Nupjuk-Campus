@@ -1,9 +1,3 @@
-const DEADLINE_TIMINGS = [
-  { value: '1h', label: '1 hour' },
-  { value: '1d', label: '24 hours' },
-  { value: '3d', label: '3 days' },
-];
-
 const PREFERENCE_FIELDS = [
   { key: 'post_comment_enabled', label: 'Comments' },
   { key: 'deadline_enabled', label: 'Deadlines' },
@@ -54,7 +48,6 @@ export default function NotificationPreferencesPanel({
       ) : (
         <div className="preferences-list">
           {preferences.map((preference) => {
-            const timings = normalizeTimings(preference.deadline_reminder_timing);
             const isSaving = savingPreferenceId === preference.id;
 
             return (
@@ -84,30 +77,18 @@ export default function NotificationPreferencesPanel({
 
                 <div className="deadline-timings">
                   <span className="deadline-timings-label">Deadline reminders</span>
-                  <div className="timing-options">
-                    {DEADLINE_TIMINGS.map((timing) => {
-                      const isChecked = timings.includes(timing.value);
-
-                      return (
-                        <label className="timing-chip" key={timing.value}>
-                          <input
-                            type="checkbox"
-                            checked={isChecked}
-                            disabled={isSaving || !preference.deadline_enabled}
-                            onChange={(event) => {
-                              const nextTimings = event.target.checked
-                                ? [...timings, timing.value]
-                                : timings.filter((value) => value !== timing.value);
-
-                              onPreferenceChange(preference.id, {
-                                deadline_reminder_timing: nextTimings,
-                              });
-                            }}
-                          />
-                          <span>{timing.label}</span>
-                        </label>
-                      );
-                    })}
+                  <div
+                    className="timing-static-info"
+                    style={{ marginTop: '8px', color: 'var(--text-secondary)', fontSize: '0.9rem' }}
+                  >
+                    {preference.deadline_enabled ? (
+                      <p>
+                        Reminders will be sent automatically <strong>24 hours</strong> and{' '}
+                        <strong>3 hours</strong> before the deadline.
+                      </p>
+                    ) : (
+                      <p>Deadline reminders are currently disabled.</p>
+                    )}
                   </div>
                 </div>
               </section>
