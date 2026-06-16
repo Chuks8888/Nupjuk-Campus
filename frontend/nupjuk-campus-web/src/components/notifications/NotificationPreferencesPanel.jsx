@@ -7,14 +7,9 @@ const PREFERENCE_FIELDS = [
 
 function getPreferenceTitle(preference) {
   if (preference.course) {
-    return `${preference.course.course_code} ${preference.course.course_name}`;
+    return `${preference.course.courseCode ?? preference.course.course_code} ${preference.course.courseName ?? preference.course.course_name}`;
   }
-
   return 'Global preferences';
-}
-
-function normalizeTimings(value) {
-  return Array.isArray(value) ? value : [];
 }
 
 export default function NotificationPreferencesPanel({
@@ -22,7 +17,6 @@ export default function NotificationPreferencesPanel({
   error,
   savingPreferenceId,
   onPreferenceChange,
-  onCreateDefaultPreference,
 }) {
   return (
     <div className="preferences-panel">
@@ -35,15 +29,9 @@ export default function NotificationPreferencesPanel({
 
       {preferences.length === 0 ? (
         <div className="preferences-empty">
-          <p className="empty-state">No notification preferences found.</p>
-          <button
-            type="button"
-            className="alerts-action-button"
-            onClick={onCreateDefaultPreference}
-            disabled={Boolean(savingPreferenceId)}
-          >
-            Create preferences
-          </button>
+          <p className="empty-state">
+            No notification preferences found. Enable them from within a Course.
+          </p>
         </div>
       ) : (
         <div className="preferences-list">
@@ -81,6 +69,7 @@ export default function NotificationPreferencesPanel({
                     className="timing-static-info"
                     style={{ marginTop: '8px', color: 'var(--text-secondary)', fontSize: '0.9rem' }}
                   >
+                    {/* Reverted to deadline_enabled */}
                     {preference.deadline_enabled ? (
                       <p>
                         Reminders will be sent automatically <strong>24 hours</strong> and{' '}

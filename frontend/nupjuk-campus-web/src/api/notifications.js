@@ -22,8 +22,7 @@ function normalizePreference(preference) {
     raw_id: preference.id,
     user_id: preference.userId ?? preference.user_id,
     course_id: preference.courseId ?? preference.course_id ?? null,
-    post_comment_enabled:
-      preference.postCommentEnabled ?? preference.post_comment_enabled,
+    post_comment_enabled: preference.postCommentEnabled ?? preference.post_comment_enabled,
     deadline_enabled: preference.deadlineEnabled ?? preference.deadline_enabled,
     meeting_enabled: preference.meetingEnabled ?? preference.meeting_enabled,
     email_enabled: preference.emailEnabled ?? preference.email_enabled,
@@ -66,9 +65,7 @@ export async function markNotificationAsRead(notificationId) {
 
   return {
     message: response.message,
-    notification: response.notification
-      ? normalizeNotification(response.notification)
-      : null,
+    notification: response.notification ? normalizeNotification(response.notification) : null,
   };
 }
 
@@ -88,8 +85,7 @@ export async function updateNotificationPreferences(preferences) {
     method: 'PUT',
     body: {
       courseId: preferences.courseId ?? preferences.course_id,
-      postCommentEnabled:
-        preferences.postCommentEnabled ?? preferences.post_comment_enabled,
+      postCommentEnabled: preferences.postCommentEnabled ?? preferences.post_comment_enabled,
       deadlineEnabled: preferences.deadlineEnabled ?? preferences.deadline_enabled,
       meetingEnabled: preferences.meetingEnabled ?? preferences.meeting_enabled,
       emailEnabled: preferences.emailEnabled ?? preferences.email_enabled,
@@ -100,8 +96,6 @@ export async function updateNotificationPreferences(preferences) {
 
   return {
     message: response.message,
-    preferences: response.preferences
-      ? normalizePreference(response.preferences)
-      : null,
+    preferences: response.preferences ? normalizePreference(response.preferences) : null,
   };
 }
