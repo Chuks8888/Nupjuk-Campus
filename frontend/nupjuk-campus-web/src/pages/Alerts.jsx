@@ -126,7 +126,9 @@ export default function Alerts() {
       if (response.preferences) {
         setPreferences((current) =>
           current.map((preference) =>
-            preference.id === preferenceId ? response.preferences : preference
+            preference.id === preferenceId
+              ? { ...response.preferences, course: preference.course }
+              : preference
           )
         );
       }
@@ -137,38 +139,6 @@ export default function Alerts() {
         )
       );
       setPreferencesError(err.message || 'Failed to update preferences.');
-    } finally {
-      setSavingPreferenceId('');
-    }
-  };
-
-  const handleCreateDefaultPreference = async () => {
-    const temporaryPreference = {
-      id: 'new-global-preference',
-      course_id: null,
-      post_comment_enabled: true,
-      deadline_enabled: true,
-      meeting_enabled: true,
-      email_enabled: false,
-      deadline_reminder_timing: ['24h', '3h'],
-      course: null,
-    };
-
-    setPreferencesError('');
-    setSavingPreferenceId(temporaryPreference.id);
-
-    setPreferences((current) => [...current, temporaryPreference]);
-
-    try {
-      const response = await updateNotificationPreferences(temporaryPreference);
-      if (response.preferences) {
-        setPreferences((current) =>
-          current.map((p) => (p.id === temporaryPreference.id ? response.preferences : p))
-        );
-      }
-    } catch (err) {
-      setPreferences((current) => current.filter((p) => p.id !== temporaryPreference.id));
-      setPreferencesError(err.message || 'Failed to create preferences.');
     } finally {
       setSavingPreferenceId('');
     }
@@ -240,7 +210,6 @@ export default function Alerts() {
             error={preferencesError}
             savingPreferenceId={savingPreferenceId}
             onPreferenceChange={handlePreferenceChange}
-            onCreateDefaultPreference={handleCreateDefaultPreference}
           />
         </aside>
       </div>
