@@ -269,18 +269,30 @@ async function main() {
     }
   }
 
+  const now = new Date();
+
+  // Create a date exactly 3 hours and 2 minutes from right now
+  const test3hDate = new Date(
+    now.getTime() + 3 * 60 * 60 * 1000 + 2 * 60 * 1000,
+  );
+
+  // Create a date exactly 24 hours and 2 minutes from right now
+  const test24hDate = new Date(
+    now.getTime() + 24 * 60 * 60 * 1000 + 2 * 60 * 1000,
+  );
+
   const assignmentSeeds = [
     [
       "CS.30500",
       "Milestone 3: Architecture and API Contract",
-      "2026-05-24T23:59:00+09:00",
+      test3hDate.toISOString(),
       "Finalize module boundaries, endpoint contracts, and risk notes.",
       "cs30500-m3",
     ],
     [
       "CS.30500",
       "Sprint Review Demo",
-      "2026-05-31T18:00:00+09:00",
+      test24hDate.toISOString(),
       "Prepare a five minute demo with at least one end-to-end user flow.",
       "cs30500-demo",
     ],

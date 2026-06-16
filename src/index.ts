@@ -14,6 +14,7 @@ import notificationsRouter from "./routes/notifications";
 import path from "path";
 import attachmentsRouter from "./old-routes/attachments";
 import { cleanupExpiredAttachments } from "./jobs/cleanupExpiredAttachments";
+import { startCronJobs } from "./cron";
 import { setupRealtime } from "./realtime";
 
 const app = express();
@@ -48,7 +49,9 @@ setInterval(
 
 const PORT = Number(process.env.PORT) || 3000;
 
-setupRealtime(server);
+const io = setupRealtime(server);
+
+startCronJobs(io);
 
 server.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
