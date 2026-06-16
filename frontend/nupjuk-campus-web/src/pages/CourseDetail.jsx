@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useParams, useNavigate, useLocation } from 'react-router-dom';
-import { ArrowLeft, Users, Bell, BellOff } from 'lucide-react';
+import { ArrowLeft, Users, Bell, BellOff, Settings } from 'lucide-react';
 import CourseTabs from '../components/courses/CourseTabs';
 import CourseBoard from '../components/courses/CourseBoard';
 import CourseTasks from '../components/courses/CourseTasks';
@@ -53,6 +53,7 @@ export default function CourseDetail() {
         const currentPref = prefData.find(
           (p) => String(p.courseId || p.course_id) === String(courseId)
         );
+
         setCoursePreference(currentPref || null);
       } catch (err) {
         setError(err.message || 'Failed to load course detail.');
@@ -66,19 +67,16 @@ export default function CourseDetail() {
 
   const handleAssignmentStatusChange = async (assignmentId, newStatus) => {
     const previousAssignments = [...assignments];
-
     try {
       setAssignments((prevAssignments) =>
         prevAssignments.map((a) =>
           a.id === assignmentId ? { ...a, user_completion_status: newStatus } : a
         )
       );
-
       await updateAssignmentStatus(courseId, assignmentId, newStatus);
     } catch (error) {
       setAssignments(previousAssignments);
       alert('Failed to save assignment status. Please try again.');
-      console.error('Failed to sync status with server:', error);
     }
   };
 
@@ -88,16 +86,44 @@ export default function CourseDetail() {
     setMeetings(updatedMeetings);
   };
 
-  const handleToggleCourseNotifications = async () => {
+  const handleCreatePreference = async () => {
     setIsUpdatingPref(true);
 
     const payload = {
       course_id: parseInt(courseId, 10),
-      post_comment_enabled: coursePreference ? !coursePreference.post_comment_enabled : true,
-      deadline_enabled: coursePreference ? !coursePreference.deadline_enabled : true,
-      meeting_enabled: coursePreference ? !coursePreference.meeting_enabled : true,
-      email_enabled: coursePreference ? coursePreference.email_enabled : false,
+      post_comment_enabled: true,
+      deadline_enabled: true,
+      meeting_enabled: true,
+      email_enabled: false,
       deadline_reminder_timing: ['24h', '3h'],
+    };
+
+    try {
+      const response = await updateNotificationPreferences(payload);
+      if (response.preferences) {
+        setCoursePreference(response.preferences);
+      }
+    } catch (err) {
+      alert('Failed to create course notification preferences.');
+      console.error(err);
+    } finally {
+      setIsUpdatingPref(false);
+    }
+  };
+
+  const handleToggleCourseNotifications = async () => {
+    if (!coursePreference) return; // Guard clause
+
+    setIsUpdatingPref(true);
+    const nextState = !coursePreference.deadline_enabled;
+
+    const payload = {
+      course_id: parseInt(courseId, 10),
+      post_comment_enabled: nextState,
+      deadline_enabled: nextState,
+      meeting_enabled: nextState,
+      email_enabled: coursePreference.email_enabled,
+      deadline_reminder_timing: coursePreference.deadline_reminder_timing || ['24h', '3h'],
     };
 
     try {
@@ -118,7 +144,6 @@ export default function CourseDetail() {
   if (!course) return <div className="course-detail-container">Course not found</div>;
 
   const prefix = course.course_code.replace(/[0-9]/g, '');
-  const notificationsEnabled = coursePreference?.deadline_enabled;
 
   return (
     <div className="course-detail-container">
@@ -143,19 +168,32 @@ export default function CourseDetail() {
         </div>
 
         <div className="course-header-actions" style={{ marginLeft: 'auto' }}>
-          <button
-            className={`alerts-action-button ${notificationsEnabled ? 'active' : ''}`}
-            onClick={handleToggleCourseNotifications}
-            disabled={isUpdatingPref}
-            title={
-              notificationsEnabled ? 'Disable Course Notifications' : 'Enable Course Notifications'
-            }
-          >
-            {notificationsEnabled ? <Bell size={18} /> : <BellOff size={18} />}
-            <span style={{ marginLeft: '6px' }}>
-              {notificationsEnabled ? 'Notifications On' : 'Notifications Off'}
-            </span>
-          </button>
+          {!coursePreference ? (
+            <button
+              className="alerts-action-button"
+              onClick={handleCreatePreference}
+              disabled={isUpdatingPref}
+            >
+              <Settings size={18} />
+              <span style={{ marginLeft: '6px' }}>Create preference</span>
+            </button>
+          ) : (
+            <button
+              className={`alerts-action-button ${coursePreference.deadline_enabled ? 'active' : ''}`}
+              onClick={handleToggleCourseNotifications}
+              disabled={isUpdatingPref}
+              title={
+                coursePreference.deadline_enabled
+                  ? 'Disable Course Notifications'
+                  : 'Enable Course Notifications'
+              }
+            >
+              {coursePreference.deadline_enabled ? <Bell size={18} /> : <BellOff size={18} />}
+              <span style={{ marginLeft: '6px' }}>
+                {coursePreference.deadline_enabled ? 'Notifications On' : 'Notifications Off'}
+              </span>
+            </button>
+          )}
         </div>
       </header>
 
@@ -163,11 +201,9 @@ export default function CourseDetail() {
 
       <div className="tab-content">
         {activeTab === 'board' && <CourseBoard courseId={courseId} posts={posts} />}
-
         {activeTab === 'tasks' && (
           <CourseTasks assignments={assignments} onStatusChange={handleAssignmentStatusChange} />
         )}
-
         {activeTab === 'meetings' && (
           <CourseMeetings
             courseId={courseId}
