@@ -38,6 +38,21 @@ router.get("/feed", async (req: AuthRequest, res: Response) => {
       },
     });
 
+    const meetings = await prisma.meetingEvent.findMany({
+      where: {
+        status: "finalized",
+        participants: { some: { userId } },
+        finalizedStartTime: { not: null },
+        finalizedEndTime: { not: null },
+      },
+      include: {
+        course: true,
+      },
+      orderBy: {
+        finalizedStartTime: "asc",
+      },
+    });
+
     const assignmentEvents = assignments.map((assignment) => ({
       id: `assignment-${assignment.id}`,
       title: assignment.title,
@@ -60,7 +75,19 @@ router.get("/feed", async (req: AuthRequest, res: Response) => {
       status: event.status,
     }));
 
-    const feed = [...assignmentEvents, ...personalCalendarEvents].sort(
+    const meetingEvents = meetings.map((meeting) => ({
+      id: `meeting-${meeting.id}`,
+      title: meeting.title,
+      start: meeting.finalizedStartTime,
+      end: meeting.finalizedEndTime,
+      type: "meeting",
+      courseId: meeting.courseId,
+      courseName: meeting.course.courseName,
+      courseCode: meeting.course.courseCode,
+      description: meeting.description,
+    }));
+
+    const feed = [...assignmentEvents, ...personalCalendarEvents, ...meetingEvents].sort(
       (a, b) => new Date(a.start!).getTime() - new Date(b.start!).getTime(),
     );
 

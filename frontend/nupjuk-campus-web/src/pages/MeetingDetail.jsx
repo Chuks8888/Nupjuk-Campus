@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { ArrowLeft, CalendarDays, Clock, Users } from 'lucide-react';
-import { getMeetingDetail, saveMeetingAvailability } from '../api/courses';
+import { ArrowLeft, CalendarCheck, CalendarDays, Clock, Users } from 'lucide-react';
+import { finalizeMeeting, getMeetingDetail, saveMeetingAvailability } from '../api/courses';
 import { connectMeetingRealtime } from '../api/realtime';
 import '../styles/CourseDetail.css';
 
@@ -69,16 +69,34 @@ function getSlotIso(dateKey, timeString) {
   return new Date(`${dateKey}T${timeString}:00`).toISOString();
 }
 
+function addMinutes(value, minutes) {
+  const date = new Date(value);
+  date.setMinutes(date.getMinutes() + minutes);
+  return date.toISOString();
+}
+
+function getCurrentUserId() {
+  try {
+    const user = JSON.parse(localStorage.getItem('currentUser') || 'null');
+    return user?.id ?? null;
+  } catch {
+    return null;
+  }
+}
+
 export default function MeetingDetail() {
   const { courseId, meetingId } = useParams();
   const navigate = useNavigate();
   const [meeting, setMeeting] = useState(null);
   const [selectedSlots, setSelectedSlots] = useState(new Set());
+  const [finalSlot, setFinalSlot] = useState('');
   const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
+  const [isFinalizing, setIsFinalizing] = useState(false);
   const [error, setError] = useState('');
   const [saveMessage, setSaveMessage] = useState('');
   const dragState = useRef({ active: false, mode: 'add', slots: new Set() });
+  const currentUserId = getCurrentUserId();
 
   const loadMeeting = async ({ preserveSelection = false } = {}) => {
     try {
@@ -90,6 +108,7 @@ export default function MeetingDetail() {
       setMeeting(data);
       if (!preserveSelection) {
         setSelectedSlots(new Set(data.my_available_slots));
+        setFinalSlot(data.finalized_start_time || '');
       }
     } catch (err) {
       setError(err.message || 'Failed to load meeting.');
@@ -150,10 +169,33 @@ export default function MeetingDetail() {
     return Math.max(1, ...Array.from(slotCounts.values()));
   }, [slotCounts]);
 
+  const slotOptions = useMemo(() => {
+    return dateKeys.flatMap((dateKey) =>
+      timeSlots.map((time) => {
+        const value = getSlotIso(dateKey, time);
+        return {
+          value,
+          label: `${formatDate(dateKey)} ${formatTime(time)} - ${formatTime(
+            timeFromMinutes(minutesFromTime(time) + SLOT_MINUTES)
+          )}`,
+        };
+      })
+    );
+  }, [dateKeys, timeSlots]);
+
   const dateRangeLabel =
     dateKeys.length > 0
       ? `${formatDate(dateKeys[0])} - ${formatDate(dateKeys[dateKeys.length - 1])}`
       : 'Date not set';
+
+  const isFinalized = meeting?.status === 'finalized';
+  const isCreator = currentUserId && Number(currentUserId) === Number(meeting?.creator_id);
+  const finalizedLabel =
+    meeting?.finalized_start_time && meeting?.finalized_end_time
+      ? `${formatDate(toDateKey(meeting.finalized_start_time))} ${formatTime(
+          new Date(meeting.finalized_start_time).toTimeString().slice(0, 5)
+        )} - ${formatTime(new Date(meeting.finalized_end_time).toTimeString().slice(0, 5))}`
+      : '';
 
   const applySlot = (slot, mode) => {
     setSaveMessage('');
@@ -210,6 +252,28 @@ export default function MeetingDetail() {
     }
   };
 
+  const handleFinalize = async () => {
+    if (!finalSlot) {
+      setError('Choose a final time.');
+      return;
+    }
+
+    try {
+      setIsFinalizing(true);
+      setError('');
+      setSaveMessage('');
+      await finalizeMeeting(meetingId, finalSlot, addMinutes(finalSlot, SLOT_MINUTES));
+      const updated = await getMeetingDetail(meetingId);
+      setMeeting(updated);
+      setFinalSlot(updated.finalized_start_time || finalSlot);
+      setSaveMessage('Meeting finalized and added to calendars.');
+    } catch (err) {
+      setError(err.message || 'Failed to finalize meeting.');
+    } finally {
+      setIsFinalizing(false);
+    }
+  };
+
   if (isLoading) return <div className="meeting-detail-container">Loading meeting...</div>;
   if (error && !meeting) return <div className="meeting-detail-container">{error}</div>;
   if (!meeting) return <div className="meeting-detail-container">Meeting not found.</div>;
@@ -240,6 +304,11 @@ export default function MeetingDetail() {
           <span>
             <Users size={15} /> {meeting.participant_count} participants
           </span>
+          {isFinalized && (
+            <span className="meeting-finalized-meta">
+              <CalendarCheck size={15} /> {finalizedLabel}
+            </span>
+          )}
         </div>
       </header>
 
@@ -253,14 +322,43 @@ export default function MeetingDetail() {
             type="button"
             className="meeting-primary-button"
             onClick={handleSave}
-            disabled={isSaving}
+            disabled={isSaving || isFinalized}
           >
-            {isSaving ? 'Saving...' : 'Save availability'}
+            {isSaving ? 'Saving...' : isFinalized ? 'Finalized' : 'Save availability'}
           </button>
         </div>
 
         {error && <p className="meeting-form-error">{error}</p>}
         {saveMessage && <p className="meeting-save-message">{saveMessage}</p>}
+
+        {(isCreator || isFinalized) && (
+          <div className="meeting-finalize-panel">
+            <div>
+              <h3>Final time</h3>
+              <p>{isFinalized ? finalizedLabel : 'Choose the meeting time to add to calendars.'}</p>
+            </div>
+            {!isFinalized && (
+              <div className="meeting-finalize-controls">
+                <select value={finalSlot} onChange={(event) => setFinalSlot(event.target.value)}>
+                  <option value="">Select time</option>
+                  {slotOptions.map((slot) => (
+                    <option key={slot.value} value={slot.value}>
+                      {slot.label}
+                    </option>
+                  ))}
+                </select>
+                <button
+                  type="button"
+                  className="meeting-primary-button"
+                  onClick={handleFinalize}
+                  disabled={isFinalizing}
+                >
+                  {isFinalizing ? 'Finalizing...' : 'Finalize meeting'}
+                </button>
+              </div>
+            )}
+          </div>
+        )}
 
         <div className="meeting-grid-scroll">
           <div

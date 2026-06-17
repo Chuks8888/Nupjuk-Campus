@@ -81,6 +81,10 @@ function normalizeMeeting(meeting) {
     date_range_end: meeting.dateRangeEnd,
     time_range_start: meeting.timeRangeStart,
     time_range_end: meeting.timeRangeEnd,
+    finalized_start_time: meeting.finalizedStartTime,
+    finalized_end_time: meeting.finalizedEndTime,
+    status: meeting.status,
+    creator_id: meeting.creator?.id ?? meeting.creatorId,
     creator_name: meeting.creator?.displayName || meeting.creator?.kaistEmail || 'Unknown',
     participant_count: meeting.participants?.length ?? 0,
     my_available_slots: (meeting.myAvailableSlots || []).map((slot) =>
@@ -159,6 +163,15 @@ export async function saveMeetingAvailability(meetingId, availableSlots) {
     method: 'POST',
     body: { availableSlots },
   });
+}
+
+export async function finalizeMeeting(meetingId, finalizedStartTime, finalizedEndTime) {
+  const response = await apiRequest(`/meetings/${meetingId}/finalize`, {
+    method: 'POST',
+    body: { finalizedStartTime, finalizedEndTime },
+  });
+
+  return response.meeting ? normalizeMeeting(response.meeting) : response;
 }
 
 export async function updateAssignmentStatus(courseId, assignmentId, status) {
