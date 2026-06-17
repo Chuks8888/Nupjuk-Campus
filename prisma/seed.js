@@ -125,34 +125,29 @@ async function main() {
   const users = {};
   const userSeeds = [
     {
-      studentId: "20260001",
-      kaistEmail: "student@kaist.ac.kr",
+      studentId: "99990001",
+      kaistEmail: "student@demo.edu",
       displayName: "Demo Student",
     },
     {
-      studentId: "20260012",
-      kaistEmail: "minji.kim@kaist.ac.kr",
-      displayName: "Minji Kim",
+      studentId: "99990002",
+      kaistEmail: "alice.smith@demo.edu",
+      displayName: "Alice Smith",
     },
     {
-      studentId: "20260027",
-      kaistEmail: "jisoo.park@kaist.ac.kr",
-      displayName: "Jisoo Park",
+      studentId: "99990003",
+      kaistEmail: "bob.johnson@demo.edu",
+      displayName: "Bob Johnson",
     },
     {
-      studentId: "20250044",
-      kaistEmail: "hyunwoo.lee@kaist.ac.kr",
-      displayName: "Hyunwoo Lee",
+      studentId: "99990004",
+      kaistEmail: "charlie.davis@demo.edu",
+      displayName: "Charlie Davis",
     },
     {
-      studentId: "20240031",
-      kaistEmail: "sara.choi@kaist.ac.kr",
-      displayName: "Sara Choi",
-    },
-    {
-      studentId: "20266111",
-      kaistEmail: "htarczynski@kaist.ac.kr",
-      displayName: "Hugo Tarczynski",
+      studentId: "99990005",
+      kaistEmail: "diana.evans@demo.edu",
+      displayName: "Diana Evans",
     },
   ];
 
@@ -174,34 +169,34 @@ async function main() {
   const courses = {};
   const courseSeeds = [
     {
-      courseCode: "CS.10003",
-      courseName: "Elements of AI",
+      courseCode: "DEMO.1001",
+      courseName: "Introduction to Synthetic Data",
       semester: "2026 Spring",
-      klmsCourseId: "klms-cs10003-2026s",
+      klmsCourseId: "DEMO.1001_2026_1",
     },
     {
-      courseCode: "CS.30408",
-      courseName: "Introduction to Information Security",
+      courseCode: "DEMO.2001",
+      courseName: "Principles of Mock Interfaces",
       semester: "2026 Spring",
-      klmsCourseId: "klms-cs30408-2026s",
+      klmsCourseId: "DEMO.2001_2026_1",
     },
     {
-      courseCode: "CS.30500",
-      courseName: "Introduction to Software Engineering",
+      courseCode: "DEMO.3001",
+      courseName: "Advanced Placeholder Structures",
       semester: "2026 Spring",
-      klmsCourseId: "klms-cs30500-2026s",
+      klmsCourseId: "DEMO.3001_2026_1",
     },
     {
-      courseCode: "CS.30704",
-      courseName: "Introduction to Human-Computer Interaction",
+      courseCode: "DEMO.4001",
+      courseName: "Simulated System Dynamics",
       semester: "2026 Spring",
-      klmsCourseId: "klms-cs30704-2026s",
+      klmsCourseId: "DEMO.4001_2026_1",
     },
     {
-      courseCode: "CS.40503",
-      courseName: "Automated Software Testing",
+      courseCode: "DEMO.5001",
+      courseName: "Fictional Engineering Practices",
       semester: "2026 Spring",
-      klmsCourseId: "klms-cs40503-2026s",
+      klmsCourseId: "DEMO.5001_2026_1",
     },
   ];
 
@@ -227,19 +222,18 @@ async function main() {
     });
   }
 
-  // htarczynski@kaist.ac.kr is excluded from enrollments so he remains empty.
   const enrollmentPlan = {
-    "student@kaist.ac.kr": [
-      "CS.10003",
-      "CS.30408",
-      "CS.30500",
-      "CS.30704",
-      "CS.40503",
+    "student@demo.edu": [
+      "DEMO.1001",
+      "DEMO.2001",
+      "DEMO.3001",
+      "DEMO.4001",
+      "DEMO.5001",
     ],
-    "minji.kim@kaist.ac.kr": ["CS.10003", "CS.30500", "CS.30704"],
-    "jisoo.park@kaist.ac.kr": ["CS.30500", "CS.30408"],
-    "hyunwoo.lee@kaist.ac.kr": ["CS.30704", "CS.30408", "CS.40503"],
-    "sara.choi@kaist.ac.kr": ["CS.30500", "CS.10003", "CS.40503"],
+    "alice.smith@demo.edu": ["DEMO.1001", "DEMO.3001", "DEMO.4001"],
+    "bob.johnson@demo.edu": ["DEMO.3001", "DEMO.2001"],
+    "charlie.davis@demo.edu": ["DEMO.4001", "DEMO.2001", "DEMO.5001"],
+    "diana.evans@demo.edu": ["DEMO.3001", "DEMO.1001", "DEMO.5001"],
   };
 
   for (const [email, courseCodes] of Object.entries(enrollmentPlan)) {
@@ -269,75 +263,75 @@ async function main() {
     }
   }
 
-  const now = new Date();
+  const timeNow = new Date();
 
   // Create a date exactly 3 hours and 2 minutes from right now
   const test3hDate = new Date(
-    now.getTime() + 3 * 60 * 60 * 1000 + 2 * 60 * 1000,
+    timeNow.getTime() + 3 * 60 * 60 * 1000 + 2 * 60 * 1000,
   );
 
   // Create a date exactly 24 hours and 2 minutes from right now
   const test24hDate = new Date(
-    now.getTime() + 24 * 60 * 60 * 1000 + 2 * 60 * 1000,
+    timeNow.getTime() + 24 * 60 * 60 * 1000 + 2 * 60 * 1000,
   );
 
   const assignmentSeeds = [
     [
-      "CS.30500",
-      "Milestone 3: Architecture and API Contract",
+      "DEMO.3001",
+      "Milestone 3: Mock Architecture and API Contract",
       test3hDate.toISOString(),
-      "Finalize module boundaries, endpoint contracts, and risk notes.",
-      "cs30500-m3",
+      "Finalize dummy module boundaries, placeholder endpoints, and fake risk notes.",
+      "demo3001-m3",
     ],
     [
-      "CS.30500",
-      "Sprint Review Demo",
+      "DEMO.3001",
+      "Mock Sprint Review Demo",
       test24hDate.toISOString(),
-      "Prepare a five minute demo with at least one end-to-end user flow.",
-      "cs30500-demo",
+      "Prepare a simulated five minute demo with at least one mock user flow.",
+      "demo3001-demo",
     ],
     [
-      "CS.30704",
-      "Contextual Inquiry Report",
+      "DEMO.4001",
+      "Synthetic Inquiry Report",
       "2026-05-23T23:59:00+09:00",
-      "Summarize interview findings and design implications.",
-      "cs30704-ci",
+      "Summarize dummy interview findings and mock design implications.",
+      "demo4001-ci",
     ],
     [
-      "CS.30408",
-      "Cryptography Basics Quiz",
+      "DEMO.2001",
+      "Fictional Basics Quiz",
       "2026-05-27T23:59:00+09:00",
-      "Short quiz on symmetric vs asymmetric encryption.",
-      "cs30408-crypto-quiz",
+      "Short quiz on simulated topics.",
+      "demo2001-quiz",
     ],
     [
-      "CS.10003",
-      "Neural Networks Homework",
+      "DEMO.1001",
+      "Placeholder Homework",
       "2026-05-26T23:59:00+09:00",
-      "Exercises on backpropagation and gradient descent.",
-      "cs10003-nn-hw",
+      "Exercises on placeholder concepts and dummy data generation.",
+      "demo1001-hw",
     ],
     [
-      "CS.40503",
-      "Unit Testing Strategy Draft",
+      "DEMO.5001",
+      "Simulated Strategy Draft",
       "2026-05-28T23:59:00+09:00",
-      "Upload a testing strategy draft for the main module.",
-      "cs40503-draft",
+      "Upload a mock strategy draft for the main component.",
+      "demo5001-draft",
     ],
     // Demo dynamic deadline assignments (+4h and +25h)
     [
-      "CS.30500",
-      "URGENT: Mid-Sprint Check-in",
+      "DEMO.3001",
+      "URGENT: Mid-Sprint Fake Check-in",
       in4Hours,
-      "Submit current progress report (Due in 4 hours).",
-      "cs30500-urgent-4h",
+      "Submit simulated progress report (Due in 4 hours).",
+      "demo3001-urgent-4h",
     ],
     [
-      "CS.30704",
-      "Heuristic Evaluation Submission",
+      "DEMO.4001",
+      "Dummy Evaluation Submission",
       in25Hours,
-      "Complete the peer heuristic evaluation template (Due in 25 hours).",
-      "cs30704-he-25h",
+      "Complete the fictional evaluation template (Due in 25 hours).",
+      "demo4001-he-25h",
     ],
   ];
 
@@ -349,7 +343,7 @@ async function main() {
     description,
     klmsAssignmentId,
   ] of assignmentSeeds) {
-    const assignmentUrl = `https://klms.kaist.ac.kr/mod/assign/view.php?id=${klmsAssignmentId}`;
+    const assignmentUrl = `https://mock.demo.edu/mod/assign/view.php?id=${klmsAssignmentId}`;
     assignments[klmsAssignmentId] = await prisma.assignment.upsert({
       where: { assignmentUrl },
       update: {
@@ -372,17 +366,17 @@ async function main() {
     });
   }
 
-  const demo = users["student@kaist.ac.kr"];
+  const demoUser = users["student@demo.edu"];
   const demoStatuses = [
-    ["cs30500-m3", "not_submitted", "in_progress"],
-    ["cs30500-demo", "not_submitted", "todo"],
-    ["cs30704-ci", "submitted", "done"],
-    ["cs30408-crypto-quiz", "not_submitted", "in_progress"],
-    ["cs10003-nn-hw", "submitted", "done"],
-    ["cs40503-draft", "not_submitted", "in_progress"],
+    ["demo3001-m3", "not_submitted", "in_progress"],
+    ["demo3001-demo", "not_submitted", "todo"],
+    ["demo4001-ci", "submitted", "done"],
+    ["demo2001-quiz", "not_submitted", "in_progress"],
+    ["demo1001-hw", "submitted", "done"],
+    ["demo5001-draft", "not_submitted", "in_progress"],
     // Dynamic assignments
-    ["cs30500-urgent-4h", "not_submitted", "todo"],
-    ["cs30704-he-25h", "not_submitted", "todo"],
+    ["demo3001-urgent-4h", "not_submitted", "todo"],
+    ["demo4001-he-25h", "not_submitted", "todo"],
   ];
 
   for (const [
@@ -393,7 +387,7 @@ async function main() {
     await prisma.userAssignmentStatus.upsert({
       where: {
         userId_assignmentId: {
-          userId: demo.id,
+          userId: demoUser.id,
           assignmentId: assignments[assignmentKey].id,
         },
       },
@@ -406,7 +400,7 @@ async function main() {
             : null,
       },
       create: {
-        userId: demo.id,
+        userId: demoUser.id,
         assignmentId: assignments[assignmentKey].id,
         klmsSubmissionStatus,
         userCompletionStatus,
@@ -420,45 +414,45 @@ async function main() {
 
   const postSeeds = [
     [
-      "CS.30500",
-      "student@kaist.ac.kr",
-      "How are people structuring the API contract?",
-      "Our team is splitting endpoints by auth, ingest, calendar, and boards. Curious if anyone found a cleaner way to document request shapes.",
+      "DEMO.3001",
+      "student@demo.edu",
+      "How are people structuring the mock data?",
+      "Our team is splitting fake data by users, roles, and components. Curious if anyone found a cleaner way.",
       "QUESTION",
     ],
     [
-      "CS.30500",
-      "minji.kim@kaist.ac.kr",
-      "Sprint review checklist",
-      "We made a small checklist for demo readiness: seed data, login flow, one failing-state screenshot, and known limitations.",
+      "DEMO.3001",
+      "alice.smith@demo.edu",
+      "Mock review checklist",
+      "We made a small checklist for demo readiness using dummy data and placeholder graphics.",
       "GENERAL",
     ],
     [
-      "CS.30704",
-      "sara.choi@kaist.ac.kr",
-      "Prototype test participants",
-      "If anyone still needs a pilot participant, I can trade one session tomorrow afternoon.",
+      "DEMO.4001",
+      "diana.evans@demo.edu",
+      "Fictional test participants",
+      "If anyone still needs a simulated participant profile, I can trade one session tomorrow.",
       "GENERAL",
     ],
     [
-      "CS.30408",
-      "jisoo.park@kaist.ac.kr",
-      "Key exchange algorithms",
-      "Are we supposed to cover Diffie-Hellman in depth for the upcoming quiz?",
+      "DEMO.2001",
+      "bob.johnson@demo.edu",
+      "Simulated algorithms",
+      "Are we supposed to cover mock functions in depth for the upcoming dummy quiz?",
       "QUESTION",
     ],
     [
-      "CS.10003",
-      "student@kaist.ac.kr",
-      "Learning rate decay",
-      "Is anyone else finding their loss plateauing too early on the second dataset?",
+      "DEMO.1001",
+      "student@demo.edu",
+      "Placeholder metric issues",
+      "Is anyone else finding their metrics plateauing too early on the mock dataset?",
       "QUESTION",
     ],
     [
-      "CS.40503",
-      "hyunwoo.lee@kaist.ac.kr",
-      "Test coverage tools",
-      "Which tool are you guys using for Jest coverage reporting?",
+      "DEMO.5001",
+      "charlie.davis@demo.edu",
+      "Test coverage on dummies",
+      "Which tool are you guys using for reporting fake coverage data?",
       "GENERAL",
     ],
   ];
@@ -479,33 +473,33 @@ async function main() {
   const commentSeeds = [
     [
       0,
-      "minji.kim@kaist.ac.kr",
-      "We used a one-page table with method, path, auth, request, and response columns.",
+      "alice.smith@demo.edu",
+      "We used a simple JSON structure with fake IDs and static strings.",
     ],
     [
       0,
-      "jisoo.park@kaist.ac.kr",
-      "Adding sample error responses helped us find mismatches early.",
+      "bob.johnson@demo.edu",
+      "Adding random number generators helped us find UI bugs early.",
     ],
     [
       1,
-      "student@kaist.ac.kr",
-      "This is useful. The seed data point is easy to forget.",
+      "student@demo.edu",
+      "This is useful. Keeping the mock graphics consistent is hard.",
     ],
     [
       2,
-      "student@kaist.ac.kr",
-      "I can do a pilot around 4pm if that still helps.",
+      "student@demo.edu",
+      "I can run a dummy test profile around 4pm if that helps.",
     ],
     [
       3,
-      "sara.choi@kaist.ac.kr",
-      "The TA mentioned just the high-level concept is enough.",
+      "diana.evans@demo.edu",
+      "The instructor mentioned just the high-level mock concepts are enough.",
     ],
     [
       4,
-      "minji.kim@kaist.ac.kr",
-      "Try adding a step decay scheduler, it helped our model converge.",
+      "alice.smith@demo.edu",
+      "Try refreshing the random seed, it helped our fake charts look better.",
     ],
   ];
 
@@ -519,17 +513,17 @@ async function main() {
 
   const personalEvents = [
     [
-      "Morning lecture block",
+      "Mock Morning Block",
       "2026-05-22T09:00:00+09:00",
       "2026-05-22T12:00:00+09:00",
-      "CS.30500 and CS.30704 back to back",
+      "DEMO.3001 and DEMO.4001 back to back",
       "todo",
     ],
     [
-      "Team 10 implementation sync",
+      "Team Dummy Sync",
       "2026-05-22T19:00:00+09:00",
       "2026-05-22T20:30:00+09:00",
-      "Check Docker, auth, and KLMS ingestion status",
+      "Check mock endpoints, static assets, and simulated ingestion status",
       "todo",
     ],
   ];
@@ -542,7 +536,7 @@ async function main() {
     status,
   ] of personalEvents) {
     await upsertPersonalEvent({
-      userId: demo.id,
+      userId: demoUser.id,
       title,
       startTime: date(startTime),
       endTime: date(endTime),
@@ -552,11 +546,11 @@ async function main() {
   }
 
   const meeting = await upsertMeetingEvent({
-    courseId: courses["CS.30500"].id,
-    creatorId: demo.id,
-    title: "Team 10 Sprint Planning",
+    courseId: courses["DEMO.3001"].id,
+    creatorId: demoUser.id,
+    title: "Team Demo Planning",
     description:
-      "Pick the final demo path and divide backend/frontend cleanup.",
+      "Pick the final dummy path and divide fake backend/frontend cleanup.",
     dateRangeStart: date("2026-05-23T00:00:00+09:00"),
     dateRangeEnd: date("2026-05-25T23:59:59+09:00"),
     timeRangeStart: "18:00",
@@ -567,9 +561,9 @@ async function main() {
   });
 
   for (const email of [
-    "student@kaist.ac.kr",
-    "minji.kim@kaist.ac.kr",
-    "jisoo.park@kaist.ac.kr",
+    "student@demo.edu",
+    "alice.smith@demo.edu",
+    "bob.johnson@demo.edu",
   ]) {
     await prisma.meetingParticipant.upsert({
       where: {
@@ -610,20 +604,20 @@ async function main() {
   }
 
   await upsertNotification({
-    userId: demo.id,
+    userId: demoUser.id,
     type: "deadline",
-    content: "CS.30500 Sprint Demo is due soon.",
+    content: "DEMO.3001 Sprint Demo is due soon.",
     deliveryChannel: "in_app",
     targetType: "assignment",
-    targetId: assignments["cs30500-demo"].id,
-    targetUrl: assignments["cs30500-demo"].assignmentUrl,
+    targetId: assignments["demo3001-demo"].id,
+    targetUrl: assignments["demo3001-demo"].assignmentUrl,
     isRead: false,
   });
 
   await upsertNotification({
-    userId: demo.id,
+    userId: demoUser.id,
     type: "comment",
-    content: "Minji replied to your CS.30500 API contract question.",
+    content: "Alice replied to your DEMO.3001 mock data question.",
     deliveryChannel: "in_app",
     targetType: "post",
     targetId: posts[0].id,
@@ -644,7 +638,7 @@ async function main() {
   };
 
   console.log("Seed complete.");
-  console.log(`Demo login: student@kaist.ac.kr / ${password}`);
+  console.log(`Demo login: student@demo.edu / ${password}`);
   console.table(counts);
 }
 
